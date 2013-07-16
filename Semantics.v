@@ -4,17 +4,29 @@ Require Import Syntax.
 Require Import Sets.
 Require Import Coq.Arith.EqNat.
 
+Definition get_Field (pkt : packet) (fld : field) : nat :=
+  match fld with
+    | Src => pktSrc pkt
+    | Dst => pktDst pkt
+  end.
 
-Axiom get_Field : packet -> field -> nat.
-
-Axiom set_field : history -> field -> nat -> history.
+Definition set_field (h : history) (fld : field) (n : nat) : history :=
+  match h with
+    | OneHist p => match fld with
+             | Src => OneHist (Packet n (get_Field p Dst))
+             | Dst => OneHist (Packet (get_Field p Src) n)
+             end
+    | ConsHist p hst => match fld with
+                  | Src => ConsHist (Packet n (get_Field p Dst)) hst
+                  | Dst => ConsHist (Packet (get_Field p Src) n) hst
+                  end
+    end.        
 
 Definition get_Packet (hst : history) : packet :=
   match hst with
     | OneHist p => p
     | ConsHist p h => p
   end.
-Check empty.
 
 Definition Kleisli {A : Type} (rel1 rel2 : A -> A -> Prop) (ina outa : A) : Prop :=
   exists (x : A), (rel1 ina x) /\ (rel2 x outa).
