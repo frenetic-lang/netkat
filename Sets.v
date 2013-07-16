@@ -1,5 +1,7 @@
 Set Implicit Arguments.
 Require Import Coq.Classes.Equivalence.
+Require Import Coq.Classes.Morphisms.
+Require Import Coq.Setoids.Setoid.
 
 Section Sets.
   
@@ -34,5 +36,29 @@ Section Sets.
       intros. unfold equiv. auto.
       Qed.
 
+  Instance union_m : 
+    Proper (equiv ==> equiv ==> equiv) union.
+  Proof with auto.
+    unfold Proper.
+    unfold respectful.
+    intros.
+    unfold equiv in *.
+    intros.
+    apply H1.
+  Qed.
+
+  Add Morphism union with signature
+    equiv ++> equiv ++> equiv as union_s_m.
+  Proof. 
+   apply union_m.
+  Qed.
+
 End Sets.
 
+Add Parametric Morphism (A : Type) : (@union A) with signature
+  @equiv A ++> @equiv A ++> @equiv A as union_s_m_x.
+  Proof.
+  intros.
+  apply union_m. auto. auto.
+  Qed.
+  

@@ -3,6 +3,7 @@ Set Implicit Arguments.
 Require Import Syntax.
 Require Import Sets.
 Require Import Coq.Arith.EqNat.
+Require Import Coq.Classes.Equivalence.
 
 Definition get_Field (pkt : packet) (fld : field) : nat :=
   match fld with
@@ -53,4 +54,6 @@ Fixpoint eval (e : exp) (h : history) : set history :=
    | Star e1 => fun (y : history) => exists (i : nat), (iter (eval e1) i h y)
   end.
 
-
+Definition equiv_exp (e1 : exp) (e2 : exp) : Prop := 
+  forall (h : history), equiv (eval e1 h) (eval e2 h).
+ 
