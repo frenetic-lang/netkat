@@ -10,6 +10,7 @@ Require Import Coq.Setoids.Setoid.
 Open Local Scope equiv_scope.
 Hint Resolve reflexivity.
 
+Existing Instances Set_equiv.
 Lemma pred_null_or_single :
   forall (pred1 : exp) (h : history), (pred pred1) -> 
          (eval pred1 h) === @empty history \/ (eval pred1 h) === (singleton h).
@@ -20,7 +21,7 @@ Proof with auto. intros.
   destruct beq_nat. right. reflexivity. left. reflexivity.
   inversion H. subst. apply IHpred1_1 in H2. apply IHpred1_2 in H3.
   destruct H2; destruct H3. left. rewrite -> H0.
-  
+  rewrite -> H1. simpl.
     
 left. simpl. reflexivity.
 
