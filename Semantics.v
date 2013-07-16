@@ -1,9 +1,8 @@
 Set Implicit Arguments.
 
 Require Import Syntax.
-Require Import Sets.
+Require Import Coq.Sets.Ensembles.
 Require Import Coq.Arith.EqNat.
-Require Import Coq.Classes.Equivalence.
 
 Definition get_Field (pkt : packet) (fld : field) : nat :=
   match fld with
@@ -32,28 +31,31 @@ Definition get_Packet (hst : history) : packet :=
 Definition Kleisli {A : Type} (rel1 rel2 : A -> A -> Prop) (ina outa : A) : Prop :=
   exists (x : A), (rel1 ina x) /\ (rel2 x outa).
 
-Fixpoint iter (rel : history -> history -> Prop) (i : nat) (inh : history) : set history :=
+Check Singleton.
+
+Check In_singleton.
+Fixpoint iter (rel : history -> history -> Prop) (i : nat) (inh : history) : Ensemble history :=
   match i with
-   | O => singleton inh
+   | O => Singleton history inh
    | S n => (Kleisli rel (iter rel (n))) inh
   end.
 
-Fixpoint eval (e : exp) (h : history) : set history :=
+Fixpoint eval (e : exp) (h : history) : Ensemble history :=
   match e with
-   | Drop => @empty history
-   | Id => singleton h
+   | Drop => @Empty_set history
+   | Id => Singleton _ h
    | Match f v => match beq_nat (get_Field (get_Packet h) f) v with 
-                    | true => singleton h
-                    | false => @empty history
+                    | true => Singleton _ h
+                    | false => @Empty_set history
                   end
-   | Mod f v => singleton (set_field h f v)
-   | Par e1 e2 => (union (eval e1 h) (eval e2 h))
-   | Neg e1 => (set_minus (singleton h) (eval e1 h))
-   | Obs => singleton (ConsHist (get_Packet h) h)
+   | Mod f v => Singleton _ (set_field h f v)
+   | Par e1 e2 => Union _ (eval e1 h) (eval e2 h)
+   | Neg e1 => Setminus _ (Singleton _ h) (eval e1 h)
+   | Obs => Singleton _ (ConsHist (get_Packet h) h)
    | Seq e1 e2 => Kleisli (eval e1) (eval e2) h
    | Star e1 => fun (y : history) => exists (i : nat), (iter (eval e1) i h y)
   end.
 
 Definition equiv_exp (e1 : exp) (e2 : exp) : Prop := 
-  forall (h : history), equiv (eval e1 h) (eval e2 h).
+  forall (h : history),  (eval e1 h) = (eval e2 h).
  
