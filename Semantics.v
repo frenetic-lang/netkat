@@ -35,11 +35,14 @@ Module Relation.
     Definition star (R : relation) : relation :=
       fun (x y : A) => exists n, (expt R n) x y.
 
-    Definition inv (R : relation) : relation :=
-      fun (x y : A) => R x y -> False /\ (R x y -> False) -> True.
-
     Definition equiv (R1 R2 : relation) :=
       forall (x y : A), R1 x y <-> R2 x y.
+
+   Definition inv (R : relation) : relation :=
+     fun (x y : A) => ((R x y) /\ False) \/ (~(R x y) /\ (x = y)).
+  
+  Definition contains (R1 R2 : relation) : Prop :=
+     forall (x y : A), R1 x y -> R2 x y.
 
   End Defs.
 
@@ -150,9 +153,34 @@ Module BooleanAlgebra.
       eval e h r -> (False \/ h = r).
   Proof with auto.
     intros.
-    induction H...
-  Admitted.
+    generalize dependent h.
+    generalize dependent r.
+    induction H; intros...
+    + unfold eval in H0. 
+    destruct (beq_nat (get_Field (get_Packet h) f) v) in H0...
+    + simpl in H1. unfold union in H1. destruct H1...
+    + simpl in H1. unfold join in H1. destruct H1. destruct H1.
+      apply IHpred1 in H1. destruct H1. contradiction. subst.
+      apply IHpred2 in H2...
+    + simpl in H0. unfold inv in H0. destruct H0. destruct H0. contradiction.
+      unfold not in H0. destruct H0. right...
+  Qed.
 
+  Lemma bool_spec_new : forall (e : exp), pred e -> 
+    contains (eval e) (@id history).
+  Proof with auto.
+    intros. unfold contains.
+    induction H; intros...
+    + simpl in H. unfold empty in H. contradiction.
+    + simpl in H. destruct (beq_nat (get_Field (get_Packet x) f) v) in H...
+      contradiction.
+    + simpl in H1. unfold union in H1. destruct H1...
+    + simpl in H1. unfold join in H1.  destruct H1... destruct H1...
+      apply IHpred1 in H1. apply IHpred2 in H2. unfold id in *. subst...
+    + simpl in H0. unfold inv in H0. destruct H0. destruct H0. contradiction. 
+      unfold not in H0. unfold id. destruct H0...
+ Qed. 
+  
   Lemma BA_Plus_One : 
     forall (e : exp),
       pred e ->
@@ -162,13 +190,11 @@ Module BooleanAlgebra.
     split.
     + intros. simpl in *. 
       unfold union in H0.
-      destruct H0...
-      destruct (bool_spec H x y H0)...
-      contradiction.
-    + intros.
-      simpl in *.
+      destruct H0... apply bool_spec_new in H0...
+    + intros. simpl in *.
       unfold union...
-  Qed.
+   Qed.
 
   Lemma BA_Excl_Mid : 
+    forall (e : exp
     
