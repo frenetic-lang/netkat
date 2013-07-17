@@ -123,3 +123,17 @@ Require Import Coq.Setoids.Setoid.
      split. intuition. auto.
      destruct H2. destruct H2. exists x0. split. intuition. auto.
  Qed. 
+
+ Lemma KA_Unroll_L:
+   forall (e : exp), (pol e) ->
+     (Par Id (Seq e (Star e))) === (Star e).
+ Proof with auto.
+   intros. split.
+   + intros. simpl in *. unfold union in H0. unfold join in H0. unfold star in *.
+     destruct H0. exists 0. simpl. auto. destruct H0. destruct H0. destruct H1.
+     exists (S x1). simpl in *. unfold join. exists x0. intuition.
+   + intros. simpl in *. unfold union. unfold join. unfold star in *.
+     destruct H0. induction x0. left. simpl in H0. apply H0. simpl in H0.
+     unfold join in H0. right. destruct H0. exists x1. split. destruct H0. trivial.
+     destruct H0. exists x0. auto.
+ Qed.
