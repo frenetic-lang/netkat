@@ -70,7 +70,3 @@ Inductive pol : exp -> Prop :=
 
 Hint Constructors pol pred.
 
-Example arjunsfirstpred : pol (Star (Neg (Seq (Neg Drop) (Id)))).
-  Proof with auto. auto 10. 
-  Qed.
-
