@@ -11,7 +11,6 @@ Require Import Coq.Setoids.Setoid.
   Existing Instances Equivalence_exp.
   Local Open Scope equiv_scope.
 
-
   (* Predicates are either identity or empty *)
   Lemma bool_spec : forall (e : exp),
     pred e ->

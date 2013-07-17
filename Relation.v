@@ -43,7 +43,7 @@ Section Defs.
 
   End Defs.
 
-  Instance Equivalence_equiv `(A : Type) : Equivalence (@equiv A).
+  Instance Equivalence_equiv `(A : Type) : Equivalence (@equiv A). 
   Proof with auto.
     split; unfold equiv.
     + unfold Reflexive.

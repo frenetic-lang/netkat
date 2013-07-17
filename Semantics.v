@@ -49,9 +49,12 @@ Require Import Coq.Setoids.Setoid.
       | Seq e1 e2 => join (eval e1) (eval e2)
       | Star e1 => star (eval e1)
     end.
-(*
+
+  Existing Instances Equivalence_equiv.
+  Local Open Scope equiv_scope.
+
   Definition equiv_exp (e1 : exp) (e2 : exp) : Prop := 
-    equiv (eval e1) (eval e2).
+    (eval e1) === (eval e2).
 
   Instance Equivalence_exp : Equivalence equiv_exp.
   Proof with auto.
@@ -66,5 +69,5 @@ Require Import Coq.Setoids.Setoid.
     + unfold Transitive.
       intros.
       eapply transitivity; eauto.
-  Qed.*)
+  Qed.
 
