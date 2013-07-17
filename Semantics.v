@@ -180,6 +180,17 @@ Module BooleanAlgebra.
     + simpl in H0. unfold inv in H0. destruct H0. destruct H0. contradiction. 
       unfold not in H0. unfold id. destruct H0...
  Qed. 
+
+  Lemma bool_true_spec : forall (e : exp) (h1 h2 : history),
+    pred e ->
+    eval e h1 h2 ->
+    h1 = h2.
+  Proof with eauto.
+    intros.
+    eapply bool_spec in H...
+    destruct H...
+    contradiction.
+  Qed.
   
   Lemma BA_Plus_One : 
     forall (e : exp),
@@ -194,7 +205,95 @@ Module BooleanAlgebra.
     + intros. simpl in *.
       unfold union...
    Qed.
+  
+  Lemma BA_Seq_Comm :
+    forall (e1 e2 : exp),
+      pred e1 -> pred e2 ->
+        (Seq e1 e2) === (Seq e2 e1).
+  Proof with eauto. 
+    intros. split. simpl in *.
+    +  intros. unfold join in *. destruct H1...
+       destruct H1.
+       assert (x = x0). eapply bool_true_spec. exact H. trivial.
+       subst.
+       assert (x0 = y). eapply bool_true_spec. exact H0. trivial.
+       subst.
+       exists y...
+     + simpl. unfold join. intros.
+       destruct H1 as [z [H1 H2]].
+       remember H1. clear Heqe.
+       remember H2. clear Heqe0.
+       apply bool_true_spec in H1...
+       apply bool_true_spec in H2...
+       subst...
+    Qed.       
 
+  Lemma BA_Plus_Dist :
+    forall (e1 e2 e3 : exp),
+       pred e1 /\ pred e2 /\ pred e3 ->
+         (Par e1 (Seq e2 e3)) === (Seq (Par e1 e2) (Par e1 e3)).
+  Proof with auto.
+    intros. split.
+    + intros. simpl in *. unfold join in *. unfold union in *.
+      destruct H0.
+      assert (x = y). eapply bool_true_spec. destruct H. exact H. trivial.
+      subst. exists y. split...
+      destruct H0. destruct H0. destruct H. destruct H2. remember H0 as H0'.
+      clear HeqH0'. remember H1 as H1'. clear HeqH1'.
+      eapply bool_true_spec in H0. subst. eapply bool_true_spec in H1. subst.
+      exists y. split... trivial. trivial.
+    + intros.  simpl in *. unfold join in *. unfold union in *.
+      destruct H0. destruct H0. destruct H0. remember H0 as H0'. clear HeqH0'.
+      destruct H. eapply bool_true_spec in H0. subst. destruct H1. left. trivial.
+      destruct H2. eapply bool_true_spec in H0.  subst. left. trivial.
+      trivial. trivial.
+      destruct H1. destruct H. remember H1 as H1'. clear HeqH1'.
+      eapply bool_true_spec in H1. subst. destruct H2. eapply bool_true_spec in H0.
+      subst. left. auto. auto. auto.
+      right. remember H0 as H0'. clear HeqH0'. remember H1 as H1'. clear HeqH1'.
+      destruct H. destruct H2.
+      eapply bool_true_spec in H1. subst. eapply bool_true_spec in H0. subst.
+      exists y. split... trivial. trivial.
+  Qed.
+
+  Lemma BA_Seq_Idem :
+    forall (e : exp),
+      pred e -> (Seq e e) === e.
+  Proof with auto.
+    intros. split.
+    + intros. simpl in *. unfold join in H0. destruct H0...
+      destruct H0... remember H1 as H1'. remember H0 as H0'.
+      clear HeqH0'. clear HeqH1'. apply bool_true_spec in H0...
+      apply bool_true_spec in H1. subst. trivial. trivial.
+    + intros. simpl. unfold join. remember H0 as H0'. clear HeqH0'.
+      apply bool_true_spec in H0... subst. exists y...
+  Qed.
+      
   Lemma BA_Excl_Mid : 
-    forall (e : exp
-    
+    forall (e : exp), 
+      pred e -> (Par e (Neg e)) === Id.
+  Proof with auto.
+    intros.
+    split.
+    + intros. simpl in *.
+      unfold union in H0.
+      unfold inv in H0. unfold id.
+      destruct H0. Focus 2. destruct H0. destruct H0. contradiction.
+      destruct H0... apply bool_spec_new in H0...
+    + intros. assert (x = y). apply bool_true_spec in H0...
+      subst. simpl. unfold union. simpl in H0. unfold id in H0. unfold inv.
+   Admitted.
+
+  Lemma BA_Contra :
+    forall (e : exp),
+      pred e ->
+      (Seq e (Neg e)) === Drop.
+  Proof with auto.
+    intros. split. 
+    + intros. simpl in *. unfold join in H0.
+      destruct H0.  destruct H0. remember H0 as H0'.
+      clear HeqH0'. apply bool_true_spec in H0. subst. unfold inv in H1.
+      destruct H1. destruct H0. contradiction. destruct H0. subst. contradiction.
+      trivial.
+    + intros. simpl in *. unfold empty in H0. contradiction.
+  Qed.        
