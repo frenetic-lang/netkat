@@ -146,6 +146,18 @@ Require Import Coq.Setoids.Setoid.
       destruct b. subst. apply beq_nat_eq in Heqb. apply Mod_to_Filter in Heqb...
       contradiction.
   Qed. 
+
+  Lemma PA_Mod_Mod:
+    forall (f1 : field) (n1 n2: nat), 
+      (Seq (Mod f1 n1) (Mod f1 n2)) === (Mod f1 n2).
+  Proof with auto.
+    intros. split.
+    + intros. simpl in *. unfold join in H. destruct H as [z [H1 H2]].
+      subst. destruct x; destruct p; simpl; destruct f1; simpl...
+    + intros. simpl in *. unfold join. subst. exists (set_field x f1 n1). split...
+      simpl. destruct x; destruct p; destruct f1; simpl...
+  Qed.
+      
  
       
      
