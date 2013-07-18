@@ -121,6 +121,30 @@ Require Import Coq.Setoids.Setoid.
       destruct b. subst... contradiction.
     + intros. simpl in *. unfold join. subst. exists (set_field x f1 n1).
       split... rewrite always_true...
+  Qed.
+  
+  Lemma Mod_to_Filter: 
+    forall (f1 : field) (n1 : nat) (z : history), 
+      (get_Field (get_Packet z) f1) = n1 -> z = set_field z f1 n1.
+  Proof with auto.
+    intros. destruct z; destruct p. simpl. destruct f1. simpl in *. subst...
+    simpl in *. subst... simpl in *. destruct z; destruct p; destruct f1; simpl in *; 
+    subst...
+  Qed.
+
+  Lemma PA_Filter_Mod:
+    forall (f1 : field) (n1 : nat), 
+      (Seq (Match f1 n1) (Mod f1 n1)) === (Match f1 n1).
+  Proof with auto with arith.
+    intros. split.
+    + intros. simpl in *. unfold join in *. destruct H as [z [H1 H2]].
+      subst. remember (beq_nat (get_Field (get_Packet x) f1) n1).
+      destruct b. subst. apply Mod_to_Filter. apply beq_nat_eq in Heqb...
+      contradiction.
+    + intros. simpl in *. unfold join in *. exists y. split...
+      remember (beq_nat (get_Field (get_Packet x) f1) n1).
+      destruct b. subst. apply beq_nat_eq in Heqb. apply Mod_to_Filter in Heqb...
+      contradiction.
   Qed. 
  
       
