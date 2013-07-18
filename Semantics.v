@@ -12,17 +12,17 @@ Require Import Coq.Setoids.Setoid.
       | Src => pktSrc pkt
       | Dst => pktDst pkt
     end.
-
+  
+  Definition set_field_p (p : packet) (fld : field) (n : nat) : packet :=
+    match fld with 
+      | Src => Packet n (get_Field p Dst)
+      | Dst => Packet (get_Field p Src) n
+    end.
+  
   Definition set_field (h : history) (fld : field) (n : nat) : history :=
     match h with
-      | OneHist p => match fld with
-                       | Src => OneHist (Packet n (get_Field p Dst))
-                       | Dst => OneHist (Packet (get_Field p Src) n)
-                     end
-      | ConsHist p hst => match fld with
-                            | Src => ConsHist (Packet n (get_Field p Dst)) hst
-                            | Dst => ConsHist (Packet (get_Field p Src) n) hst
-                          end
+      | OneHist p => OneHist (set_field_p p fld n)
+      | ConsHist p hst => ConsHist (set_field_p p fld n) h
     end.        
 
   Definition get_Packet (hst : history) : packet :=
