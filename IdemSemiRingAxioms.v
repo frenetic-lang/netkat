@@ -149,5 +149,57 @@ Require Import Coq.Setoids.Setoid.
    + intros. simpl in *. unfold union in H0. unfold join in H0. unfold star in *.
      destruct H0. 
      - exists 0. simpl. auto.
-     - destruct H0. destruct H0. destruct H0. exists (S x1). simpl in *. unfold join.
-  Admitted.
+     - destruct H0 as [z [[n H0] H1]].
+       generalize dependent x.
+       induction n; intros.
+       * simpl in H0. exists 1. simpl. unfold id in H0. subst. apply KA_Seq_One...
+       * simpl in H0.
+         unfold join in H0.
+         destruct H0 as [w [H0 H2]].
+         apply IHn in H2.
+         destruct H2 as [m H2]. exists (S m). simpl. unfold join. exists w.
+         intuition.
+   + intros. simpl in *. unfold star in H0. 
+     destruct H0 as [n H0]. 
+     generalize dependent y. generalize dependent x. induction n; intros.
+     simpl in H0. simpl. unfold union...
+     simpl in H0. unfold join in H0. destruct H0 as [w [H0 H2]].
+     apply IHn in H2.
+     unfold union in H2.
+     destruct H2.
+     * unfold id in H1. subst.
+       unfold union. right. unfold join. exists x. split...
+       unfold star. exists 0. simpl. unfold id...
+     * unfold join in H1.
+       destruct H1 as [w1 [H1 H2]].
+       unfold union. right. unfold join. unfold star.
+       unfold star in H1. destruct H1 as [m H1].
+       eexists.
+       split. 
+       exists (S m).
+       instantiate (1 := w1).
+       simpl. unfold join. exists w...
+       trivial.
+  Qed.
+  
+  Lemma KA_Lfp_L:
+    forall (e1 e2 e3 : exp), (pol e1) -> (pol e2) -> (pol e3) ->
+      (contains (Par e1 (Seq e2 e3)) e3) -> (contains (Seq (Star e1) e2) e3).
+  Proof with auto.
+    intros. 
+    split; intros.
+    simpl. intros. unfold union in H3.
+    + destruct H2 with x y. simpl in *. unfold union in *.
+      apply H4.
+      destruct H3...
+      left.
+
+ unfold join in H3.
+      destruct H3. Focus 2. trivial.
+      unfold join in H3. destruct H3 as [w H3]. destruct H3.
+      unfold star in H3. destruct H3 as [n H3].
+      induction n. simpl in H3. unfold id in H3. subst. unfold join.
+
+
+    destruct H3. 
+    
