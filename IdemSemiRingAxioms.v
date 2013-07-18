@@ -183,23 +183,25 @@ Require Import Coq.Setoids.Setoid.
   Qed.
   
   Lemma KA_Lfp_L:
-    forall (e1 e2 e3 : exp), (pol e1) -> (pol e2) -> (pol e3) ->
-      (contains (Par e1 (Seq e2 e3)) e3) -> (contains (Seq (Star e1) e2) e3).
+    forall (e1 e2 : exp), (pol e1) -> (pol e2) ->
+      (contains_exp (Seq e1 e2) e2) -> 
+      (contains_exp (Seq (Star e1) e2) e2).
   Proof with auto.
-    intros. 
-    split; intros.
-    simpl. intros. unfold union in H3.
-    + destruct H2 with x y. simpl in *. unfold union in *.
-      apply H4.
-      destruct H3...
-      left.
+    intros. unfold contains_exp in *. unfold contains in *.
+    intros. simpl in *. unfold star in H2.
+    destruct H2 as [w [H2 H3]]. destruct H2 as [n H2].
+    generalize dependent x. generalize dependent w.
+    induction n.
+    + intros. simpl in H2. unfold id in H2. subst. trivial.
+    + intros. apply H1. unfold join. simpl in H2.
+      destruct H2 as [v [H2 H4]]. eapply IHn in H3.
+      exists v. split. trivial. exact H3. trivial.
+  Qed.
+     
+  Lemma KA_Lfp_R:
+    forall (e1 e2 :exp), (pol e1) -> (pol e2) ->
+      (contains_exp (Seq e2 e1) e2) ->
+      (contains_exp (Seq e2 (Star e1)) e2).
 
- unfold join in H3.
-      destruct H3. Focus 2. trivial.
-      unfold join in H3. destruct H3 as [w H3]. destruct H3.
-      unfold star in H3. destruct H3 as [n H3].
-      induction n. simpl in H3. unfold id in H3. subst. unfold join.
 
-
-    destruct H3. 
     

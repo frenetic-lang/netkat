@@ -70,4 +70,6 @@ Require Import Coq.Setoids.Setoid.
       intros.
       eapply transitivity; eauto.
   Qed.
-
+ 
+  Definition contains_exp (e1 e2 : exp) : Prop :=
+    (contains (eval e1) (eval e2)).
