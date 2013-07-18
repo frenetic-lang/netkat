@@ -1,6 +1,7 @@
 Set Implicit Arguments.
 
 Require Import Relation.
+Require Import Omega.
 Require Import Syntax.
 Require Import Semantics.
 Require Import KAAxioms.
@@ -101,7 +102,26 @@ Require Import Coq.Setoids.Setoid.
      destruct b. subst... contradiction. trivial.
  Qed.
   
+  Lemma always_true:
+    forall (f1 : field) (n1 : nat) (x : history), 
+     beq_nat (get_Field (get_Packet (set_field x f1 n1)) f1) n1 = true.
+  Proof with auto.
+    intros. destruct x. destruct p. simpl. unfold set_field_p. simpl. destruct f1.
+    simpl... induction n1... simpl... induction n1... destruct p. simpl.
+    unfold set_field_p. destruct f1. simpl. induction n1... simpl. induction n1...
+ Qed.
 
+  Lemma PA_Mod_Filter:
+    forall (f1 : field) (n1 : nat),
+      (Seq (Mod f1 n1) (Match f1 n1)) === (Mod f1 n1).
+  Proof with auto.
+    intros. split.
+    + intros. simpl in *. unfold join in H. destruct H as [z [h1 h2]].
+      subst. remember (beq_nat (get_Field (get_Packet (set_field x f1 n1)) f1) n1).
+      destruct b. subst... contradiction.
+    + intros. simpl in *. unfold join. subst. exists (set_field x f1 n1).
+      split... rewrite always_true...
+  Qed. 
  
       
      
