@@ -3,7 +3,8 @@ MODULES := \
   Syntax \
   Semantics \
   BooleanAlgebraAxioms \
-  IdemSemiRingAxioms \
+  KAAxioms \
+  PHAxioms \
 
 VS := $(MODULES:%=%.v)
 

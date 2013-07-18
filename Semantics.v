@@ -22,7 +22,7 @@ Require Import Coq.Setoids.Setoid.
   Definition set_field (h : history) (fld : field) (n : nat) : history :=
     match h with
       | OneHist p => OneHist (set_field_p p fld n)
-      | ConsHist p hst => ConsHist (set_field_p p fld n) h
+      | ConsHist p hst => ConsHist (set_field_p p fld n) hst
     end.        
 
   Definition get_Packet (hst : history) : packet :=
