@@ -75,6 +75,33 @@ Require Import Coq.Setoids.Setoid.
      contradiction.
  Qed.
 
+ Lemma obs_doesnt_matter:
+   forall (f1 : field) (n1 : nat) (x : history),
+     (get_Field (get_Packet (ConsHist (get_Packet x) x)) f1) = 
+     (get_Field (get_Packet x) f1).
+   Proof.
+     intros.
+     simpl... reflexivity.
+ Qed.
+
+ Lemma PA_Obs_Filter_Comm:
+   forall (f1 : field) (n1 : nat),
+     (Seq Obs (Match f1 n1)) === (Seq (Match f1 n1) Obs).
+ Proof with auto.
+   intros. split.
+   + intros. simpl in *. unfold join in *. destruct H as [z [H0 H1]].
+     subst. exists x.
+    remember (beq_nat (get_Field (get_Packet (ConsHist (get_Packet x) x)) f1) n1).
+     destruct b. split... rewrite obs_doesnt_matter in Heqb. rewrite <- Heqb... trivial.
+    contradiction.
+   + intros. simpl in *. unfold join in *. destruct H as [z [H0 H1]].
+     subst. exists (ConsHist (get_Packet x) x). split...
+     rewrite <- obs_doesnt_matter in H0.
+     remember (beq_nat (get_Field (get_Packet (ConsHist (get_Packet x) x)) f1) n1).
+     destruct b. subst... contradiction. trivial.
+ Qed.
+  
+
  
       
      
