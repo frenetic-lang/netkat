@@ -158,7 +158,24 @@ Require Import Coq.Setoids.Setoid.
       simpl. destruct x; destruct p; destruct f1; simpl...
   Qed.
       
- 
+  Lemma PA_Contra:
+    forall (f1 : field) (n1 n2 : nat), (n1 <> n2) ->
+      (Seq (Match f1 n1) (Match f1 n2)) === Drop.
+  Proof with auto.
+    intros. split.
+    + intros. simpl in *. unfold join in H0. destruct H0 as [z [H0 H1]].
+      unfold empty.
+      remember (beq_nat (get_Field (get_Packet x) f1) n1).
+      remember (beq_nat (get_Field (get_Packet z) f1) n2).
+      destruct b; destruct b0; subst; destruct y; simpl in *; 
+      destruct p; try solve [apply beq_nat_eq in Heqb; apply beq_nat_eq in Heqb0;
+      subst; destruct f1; contradiction H; auto]; contradiction.
+    + intros. simpl in *. unfold join. unfold empty in H0. contradiction.
+  Qed.
+
+    
+   
+     
       
      
        
