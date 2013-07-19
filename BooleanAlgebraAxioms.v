@@ -35,14 +35,15 @@ Require Import Coq.Setoids.Setoid.
     contains (eval e) (@id history).
   Proof with auto.
     intros. unfold contains.
-    induction H; intros...
-    + simpl in H. unfold empty in H. contradiction.
-    + simpl in H. destruct (beq_nat (get_Field (get_Packet x) f) v) in H...
+    induction H; intros; simpl in *.
+    + unfold empty in H. contradiction.
+    + auto.
+    + destruct (beq_nat (get_Field (get_Packet x) f) v) in H...
       contradiction.
-    + simpl in H1. unfold union in H1. destruct H1...
-    + simpl in H1. unfold join in H1.  destruct H1... destruct H1...
+    + unfold union in H1. destruct H1...
+    + unfold join in H1.  destruct H1... destruct H1...
       apply IHpred1 in H1. apply IHpred2 in H2. unfold id in *. subst...
-    + simpl in H0. unfold inv in H0. destruct H0. destruct H0. contradiction. 
+    + unfold inv in H0. destruct H0. destruct H0. contradiction. 
       unfold not in H0. unfold id. destruct H0...
  Qed. 
 
@@ -72,16 +73,13 @@ Require Import Coq.Setoids.Setoid.
       pred e1 -> pred e2 ->
         (Seq e1 e2) === (Seq e2 e1).
   Proof with eauto. 
-    intros. split; simpl in *; unfold join; intros.
-    +  destruct H1...
-       destruct H1.
-       assert (x = x0). eapply bool_true_spec. exact H. trivial.
+    intros. split; simpl in *; unfold join; intros; destruct H1 as [z [H1 H2]].
+    +  assert (x = z). eapply bool_true_spec. exact H. trivial.
        subst.
-       assert (x0 = y). eapply bool_true_spec. exact H0. trivial.
+       assert (z = y). eapply bool_true_spec. exact H0. trivial.
        subst.
        exists y...
-     + destruct H1 as [z [H1 H2]].
-       remember H1. clear Heqe.
+     + remember H1. clear Heqe.
        remember H2. clear Heqe0.
        apply bool_true_spec in H1...
        apply bool_true_spec in H2...
@@ -168,8 +166,8 @@ Require Import Coq.Setoids.Setoid.
     + simpl in *.
       unfold union in H0.
       unfold inv in H0. unfold id.
-      destruct H0. Focus 2. destruct H0. destruct H0. contradiction.
-      destruct H0... apply bool_spec_new in H0...
+      destruct H0. apply bool_spec_new in H0... destruct H0. destruct H0. contradiction.
+      destruct H0...
     + assert (x = y). apply bool_true_spec in H0...
       subst. simpl. unfold union. simpl in H0. unfold id in H0. unfold inv.
       apply (either_or y) in H. intuition.

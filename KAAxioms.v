@@ -147,8 +147,8 @@ Require Import Coq.Setoids.Setoid.
      destruct H0 as [n H0]. 
      generalize dependent y. generalize dependent x.
      induction n; intros; simpl in *. 
-     - simpl in H0. simpl. unfold union...
-     - simpl in H0. unfold join in H0. destruct H0 as [w [H0 H2]]. 
+     - unfold union...
+     - unfold join in H0. destruct H0 as [w [H0 H2]]. 
        apply IHn in H2. unfold union in H2. destruct H2.
        * unfold id in H1. subst.
          unfold union. right. unfold join. exists x. split...

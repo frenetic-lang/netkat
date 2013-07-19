@@ -91,20 +91,19 @@ Require Import Coq.Setoids.Setoid.
     forall (f1 : field) (n1 : nat) (x : history), 
      beq_nat (get_Field (get_Packet (set_field x f1 n1)) f1) n1 = true.
   Proof with auto.
-    intros. destruct x. destruct p; simpl; unfold set_field_p; simpl; destruct f1.
-    simpl... induction n1... simpl... induction n1... simpl... destruct p. simpl.
-    unfold set_field_p. destruct f1. simpl. induction n1... simpl. induction n1...
+    intros. destruct x; destruct p; simpl; unfold set_field_p; simpl; destruct f1;
+    simpl; induction n1... 
  Qed.
 
   Lemma PA_Mod_Filter:
     forall (f1 : field) (n1 : nat),
       (Seq (Mod f1 n1) (Match f1 n1)) === (Mod f1 n1).
   Proof with auto.
-    intros. split; intros; simpl in *.
-    + unfold join in H. destruct H as [z [h1 h2]].
+    intros. split; intros; simpl in *; unfold join in *.
+    + destruct H as [z [h1 h2]].
       subst. remember (beq_nat (get_Field (get_Packet (set_field x f1 n1)) f1) n1).
       destruct b. subst... contradiction.
-    + unfold join. subst. exists (set_field x f1 n1).
+    + subst. exists (set_field x f1 n1).
       split... rewrite always_true...
   Qed.
   
@@ -112,9 +111,7 @@ Require Import Coq.Setoids.Setoid.
     forall (f1 : field) (n1 : nat) (z : history), 
       (get_Field (get_Packet z) f1) = n1 -> z = set_field z f1 n1.
   Proof with auto.
-    intros. destruct z; destruct p. simpl. destruct f1. simpl in *. subst...
-    simpl in *. subst... simpl in *. destruct z; destruct p; destruct f1; simpl in *; 
-    subst...
+    intros. destruct z; destruct p; simpl; destruct f1; simpl in *; subst...
   Qed.
 
   Lemma PA_Filter_Mod:
@@ -136,10 +133,10 @@ Require Import Coq.Setoids.Setoid.
     forall (f1 : field) (n1 n2: nat), 
       (Seq (Mod f1 n1) (Mod f1 n2)) === (Mod f1 n2).
   Proof with auto.
-    intros. split; intros; simpl in *.
-    + unfold join in H. destruct H as [z [H1 H2]].
+    intros. split; intros; simpl in *; unfold join in *.
+    + destruct H as [z [H1 H2]].
       subst. destruct x; destruct p; simpl; destruct f1; simpl...
-    + unfold join. subst. exists (set_field x f1 n1). split...
+    + subst. exists (set_field x f1 n1). split...
       simpl. destruct x; destruct p; destruct f1; simpl...
   Qed.
       
@@ -147,15 +144,14 @@ Require Import Coq.Setoids.Setoid.
     forall (f1 : field) (n1 n2 : nat), (n1 <> n2) ->
       (Seq (Match f1 n1) (Match f1 n2)) === Drop.
   Proof with auto.
-    intros. split; intros; simpl in *.
-    + unfold join in H0. destruct H0 as [z [H0 H1]].
-      unfold empty.
+    intros. split; intros; simpl in *; unfold join in *.
+    + destruct H0 as [z [H0 H1]]. unfold empty.
       remember (beq_nat (get_Field (get_Packet x) f1) n1).
       remember (beq_nat (get_Field (get_Packet z) f1) n2).
       destruct b; destruct b0; subst; destruct y; simpl in *; 
       destruct p; try solve [apply beq_nat_eq in Heqb; apply beq_nat_eq in Heqb0;
       subst; destruct f1; contradiction H; auto]; contradiction.
-    + unfold join. unfold empty in H0. contradiction.
+    + unfold empty in H0. contradiction.
   Qed.
 
     
