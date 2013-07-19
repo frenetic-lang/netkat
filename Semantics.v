@@ -45,7 +45,7 @@ Require Import Coq.Setoids.Setoid.
         fun (h r : history) => r = set_field h f v
       | Par e1 e2 => union (eval e1) (eval e2)
       | Neg e1 => inv (eval e1)
-      | Obs => fun (h r : history) => r= (ConsHist (get_Packet h) h)
+      | Obs => fun (h r : history) => r = (ConsHist (get_Packet h) h)
       | Seq e1 e2 => join (eval e1) (eval e2)
       | Star e1 => star (eval e1)
     end.
