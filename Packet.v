@@ -56,39 +56,30 @@ Module Packet : PACKET.
 
   Definition val := { n : nat & n < max_val }.
 
-Check lt_dec.
-
   Fixpoint iota (n : nat) : list nat :=
      match n with
      | O => [0]
      | S m => cons (n) (iota m)
      end.
 
-  Definition with_bound (max n : nat) : option { n : nat & n < max }:=
-    match lt_dec n max with
-    | left proof => Some (@existT nat (forall n, n < max) n proof)
-    | right _ => None
-    end.
-
-  Check with_bound.
-  
-  Definition all_fields := map (with_bound max_fld) (iota max_fld).
-  Defin
   Example iota_test : (iota 5) = [5; 4; 3; 2; 1; 0].
     cbv. reflexivity.
   Qed.
 
+  Fixpoint with_bound (i max:nat) : list { n : nat & n < max } :=
+    match i with 
+    | 0 => []
+    | S j => 
+      (match lt_dec i max with
+         | left proof => 
+           (@existT nat (fun (n:nat) => n < max) i proof) :: with_bound j max
+         | right _ => 
+           with_bound j max
+       end)
+    end.
   
-  
+  Definition all_fields := with_bound max_fld max_fld.
+
+  Definition all_vals := with_bound max_val max_val.
 
   
-
-  Fixpoint make_all_fields_help (n stop : nat) : list fld:=
-    match stop with 
-    | O => (make_all
-   
-
-
-  Fixpoint make_all_fields (n : nat) : list fld :=
-    match lt_dec n max_fld with
-    | left n_lt_max_fld => n :: (make_all_fields 

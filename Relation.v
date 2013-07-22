@@ -23,6 +23,7 @@ Section Defs.
     Definition id : relation :=
       fun (x y : A) => x = y.
     
+    (* JNF: minor, but suggest calling this 'iter' *)
     Fixpoint expt (R : relation) (n : nat) : relation :=
       match n with
         | 0 => id
@@ -35,6 +36,7 @@ Section Defs.
     Definition equiv (R1 R2 : relation) :=
       forall (x y : A), R1 x y <-> R2 x y.
 
+   (* JNF: Let's change the name. Calling this 'inv' is confusing. *)
    Definition inv (R : relation) : relation :=
      fun (x y : A) => ((R x y) /\ False) \/ (~(R x y) /\ (x = y)).
   
