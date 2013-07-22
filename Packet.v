@@ -1,6 +1,7 @@
 Set Implicit Arguments.
 
 Require Import Coq.Lists.List.
+Require Import Coq.Arith.Lt.
 Import ListNotations.
 Open Scope list_scope.
 
@@ -67,19 +68,41 @@ Module Packet : PACKET.
   Qed.
 
   Fixpoint with_bound (i max:nat) : list { n : nat & n < max } :=
-    match i with 
-    | 0 => []
-    | S j => 
-      (match lt_dec i max with
-         | left proof => 
-           (@existT nat (fun (n:nat) => n < max) i proof) :: with_bound j max
-         | right _ => 
-           with_bound j max
-       end)
+    match lt_dec i max with
+      | left proof => 
+        (@existT nat (fun (n:nat) => n < max) i proof) :: 
+        ( match i with 
+            | 0 => [] 
+            | S j => with_bound j max 
+          end )
+      | right _ => 
+        ( match i with 
+            | 0 => [] 
+            | S j => with_bound j max
+          end )
     end.
   
   Definition all_fields := with_bound max_fld max_fld.
 
   Definition all_vals := with_bound max_val max_val.
-
   
+  Lemma finite_fields_proj : forall (f : fld) (n i : nat), projT1 f = n -> n < i -> 
+    i < max_fld ->  
+    In f (with_bound i max_fld).
+  Proof. 
+    intros. induction i.
+    + inversion H0.
+    + destruct n. destruct i.
+      simpl.
+      destruct (lt_dec 1 max_fld).
+      simpl.
+      destruct (lt_dec 0 max_fld).
+      simpl.
+      right.
+      left.
+      auto.
+      admit.
+      admit.
+      admit.
+      admit.
+      admit.
