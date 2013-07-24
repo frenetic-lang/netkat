@@ -152,13 +152,61 @@ Require Import Coq.Program.Equality.
     + unfold empty in H0. contradiction.
   Qed.
 
- (* Fixpoint Add_Match_All (all_vals : list val) (f : field) (x : history) : history -> Prop :=
+ Fixpoint Add_Match_All (all_vals : list val) (f : field) : history -> history -> Prop :=
     match all_vals with
-      | nil => fun (y : history) => False
-      | v :: l => (union (fun (y : history) => Packet.beq_val (Packet.get_field f (get_packet x)) v) Add_Match_All l f x)
+      | nil => fun (y x: history) => False
+      | v :: l => union (fun (y x: history) => (match (Packet.beq_val (Packet.get_field f (get_packet x)) v) with
+                                                 | true => True
+                                                 | false => False
+                                               end))
+                        (Add_Match_All l f)
     end.
-   *)   
+
+ (*Lemma PA_Match_All : forall (f : field) (h1 h2 : history), 
+   (Add_Match_All Packet.all_vals f) h1 h2 === id h1 h2.
+ Proof with auto.
+   intros. split; intros.
+   + unfold id. destruct f. unfold Add_Match_All in H. induction Packet.all_vals. contradiction. simpl in *.
+     unfold union in H. destruct H. remember (Packet.beq_val (Packet.Pkswitch (get_packet h2)) a).
+     destruct b. apply Packet.beq_val_means in Heqb. simpl in *.*)
+
+  Fixpoint Add_Match_All_Exp (all_vals : list val) (f : field) : exp :=
+    match all_vals with 
+      | nil => Drop
+      | v :: l => (Par (Match f v) (Add_Match_All_Exp l f))
+    end.
+
+  Lemma PA_Match_All : forall (f : field), 
+    Add_Match_All_Exp Packet.all_vals f === Id.
+  Proof with auto.
+    intros. split; intros; simpl in *.
+    + destruct f; destruct x; destruct y; destruct p; destruct p0; simpl in *; try solve [induction Packet.all_vals; 
+     try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
+        remember (Packet.beq_val Pkswitch a); destruct b; try solve [trivial]; try solve [contradiction];
+        apply IHl in H; trivial]; 
+     try solve [induction Packet.all_vals; 
+     try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
+        remember (Packet.beq_val Pkinport a); destruct b; try solve [trivial]; try solve [contradiction];
+        apply IHl in H; trivial];
+     try solve [induction Packet.all_vals; 
+     try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
+        remember (Packet.beq_val Pksrcmac a); destruct b; try solve [trivial]; try solve [contradiction];
+        apply IHl in H; trivial];
+     try solve [induction Packet.all_vals; 
+     try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
+        remember (Packet.beq_val Pkdstmac a); destruct b; try solve [trivial]; try solve [contradiction];
+        apply IHl in H; trivial];
+     try solve [induction Packet.all_vals; 
+     try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
+        remember (Packet.beq_val Pkpayload a); destruct b; try solve [trivial]; try solve [contradiction];
+        apply IHl in H; trivial].
+    + unfold id in H. subst.
+      admit.
+   Admitted.
     
+   
+    
+  
    
      
       
