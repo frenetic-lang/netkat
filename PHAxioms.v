@@ -1,5 +1,7 @@
 Set Implicit Arguments.
 
+Require Import Arith.
+Require Import ArithRing.
 Require Import Relation.
 Require Import Packet.
 Require Import Omega.
@@ -150,6 +152,12 @@ Require Import Coq.Program.Equality.
     + unfold empty in H0. contradiction.
   Qed.
 
+ (* Fixpoint Add_Match_All (all_vals : list val) (f : field) (x : history) : history -> Prop :=
+    match all_vals with
+      | nil => fun (y : history) => False
+      | v :: l => (union (fun (y : history) => Packet.beq_val (Packet.get_field f (get_packet x)) v) Add_Match_All l f x)
+    end.
+   *)   
     
    
      
