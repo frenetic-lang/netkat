@@ -2,6 +2,9 @@ Set Implicit Arguments.
 
 Require Import Coq.Vectors.Vector.
 Require Import Coq.Lists.List.
+Require Import Coq.Arith.EqNat.
+Require Import Coq.Bool.Bool.
+Require Import Coq.Program.Equality.
 Import ListNotations.
 Open Scope list_scope.
 
@@ -32,7 +35,7 @@ Module Type PACKET.
     Variable n n' n1 n2 : val.
 
     Axiom mod_mod_comm : f1 <> f2 ->
-      set_field  f1 n1 (set_field f2 n2 pk) = set_field f2 n2 (set_field f1 n1 pk).
+      set_field f1 n1 (set_field f2 n2 pk) = set_field f2 n2 (set_field f1 n1 pk).
 
     Axiom mod_filter_comm : f <> f' -> 
       get_field f' pk = get_field f' (set_field f n pk).
@@ -127,7 +130,27 @@ Module Packet : PACKET.
    decide equality.
  Qed.
 
-Lemma val_eqdec :  forall (v1 v2:val), { v1 = v2 } + { v1 <> v2 }.
+(* JNF: there has got to be a better way. *)
+Lemma bvector_eqdec : forall (n:nat) (bv1 bv2:bvector n), { bv1 = bv2 } + { bv1 <> bv2 }.
+Proof with eauto.
+  dependent induction bv1. 
+  dependent destruction bv2.
+  left. intuition.
+  dependent destruction bv2.
+  destruct b.
+  destruct b0.
+  destruct (IHbv1 bv2) as [ eq | neq ].
+  left. rewrite -> eq. intuition.
+  right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
+  right. unfold not. intros. dependent destruction H. 
+  destruct b0.
+  right. unfold not. intros. dependent destruction H.  
+  destruct (IHbv1 bv2) as [ eq | neq ].
+  left. rewrite -> eq. intuition.
+  right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
+Qed.
+
+Lemma val_eqdec : forall (v1 v2:val), {v1 = v2 } + { v1 <> v2 }.
 Proof.
-  admit.
+  apply bvector_eqdec.
 Qed.
