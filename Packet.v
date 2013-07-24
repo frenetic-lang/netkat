@@ -205,11 +205,11 @@ Proof with auto.
   destruct p; destruct f; simpl; reflexivity.
 Qed.
 
-(*Lemma filter_mod : forall (f : fld) (v : val) (p : pk), 
+Lemma filter_mod : forall (f : fld) (v : val) (p : pk), 
   get_field f p = v <-> set_field f v p = p.
 Proof with auto.
   intros. split; intros.
   + destruct p; destruct f; simpl in *; subst; reflexivity.
-  + destruct p; destruct f; simpl in *; admit.
-Qed.*)
+  + destruct p; destruct f; simpl in *; inversion H; reflexivity.
+Qed.
 
