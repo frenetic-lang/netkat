@@ -1,7 +1,7 @@
 Set Implicit Arguments.
 
+Require Import Coq.Vectors.Vector.
 Require Import Coq.Lists.List.
-Require Import Coq.Arith.Lt.
 Import ListNotations.
 Open Scope list_scope.
 
@@ -53,56 +53,81 @@ Module Packet : PACKET.
 
   Parameter max_fld max_val : nat.
 
-  Definition fld := { n : nat & n < max_fld }.
+  Inductive fld := 
+    | switch : fld
+    | inport : fld
+    | srcmac : fld
+    | dstmac : fld
+    | payload : fld.
 
-  Definition val := { n : nat & n < max_val }.
+  Inductive bvector : nat -> Type :=
+    | bnil : bvector 0
+    | bcons : forall n, bool -> bvector n -> bvector (S n). 
 
-  Fixpoint iota (n : nat) : list nat :=
-     match n with
-     | O => [0]
-     | S m => cons (n) (iota m)
-     end.
+  Definition val := bvector max_val.
 
-  Example iota_test : (iota 5) = [5; 4; 3; 2; 1; 0].
-    cbv. reflexivity.
+  Definition extend_bvector (n:nat) (bv:bvector n) : list (bvector (S n)) :=
+    [bcons true bv; bcons false bv].
+
+  Fixpoint flatten (A:Type) (l:list (list A)) : list A := 
+    match l with 
+      | nil => nil
+      | h::t => h ++ flatten t
+    end.
+
+  Fixpoint all_vals_aux (i:nat) : list (bvector i) :=
+    match i with 
+      | 0 => [bnil]
+      | S j => flatten (map (fun bv => extend_bvector bv) (all_vals_aux j))
+    end.
+
+  Definition all_flds := 
+    [ switch; inport; srcmac; dstmac; payload ].
+
+  Definition all_vals := all_vals_aux max_val.
+
+  Lemma finite_fields : forall (f:fld), In f all_flds.
+  Proof.
+    intros. 
+    destruct f; simpl; intuition.
   Qed.
 
-  Fixpoint with_bound (i max:nat) : list { n : nat & n < max } :=
-    match lt_dec i max with
-      | left proof => 
-        (@existT nat (fun (n:nat) => n < max) i proof) :: 
-        ( match i with 
-            | 0 => [] 
-            | S j => with_bound j max 
-          end )
-      | right _ => 
-        ( match i with 
-            | 0 => [] 
-            | S j => with_bound j max
-          end )
-    end.
+  Lemma in_extend_bvector : 
+    forall (n:nat) (b:bool) (bv:bvector n) (l:list (bvector n)),
+      In bv l -> 
+      In (bcons b bv) (flatten (map (fun bv => extend_bvector bv) l)).
+  Proof.
+    intros.
+    generalize dependent l.
+    induction l.
+    + simpl; intuition.
+    + simpl. intros.
+      destruct H.
+      - destruct b; rewrite H; intuition.
+      - right. right. apply IHl. apply H.
+  Qed.
+    
+  Lemma in_finite_vals_aux:
+    forall (i:nat) (bv:bvector i), 
+    In bv (all_vals_aux i).
+  Proof.
+    intros.
+    induction bv.
+    + simpl. intuition.
+    + simpl. apply in_extend_bvector. apply IHbv.
+  Qed.
   
-  Definition all_fields := with_bound max_fld max_fld.
+  Lemma finite_vals : forall (v:val), In v all_vals.
+  Proof.
+    apply in_finite_vals_aux.
+  Qed.
+    
+ Lemma fld_eqdec : forall (f1 f2 : fld), { f1 = f2 } + { f1 <> f2 }.
+ Proof. 
+   decide equality.
+ Qed.
 
-  Definition all_vals := with_bound max_val max_val.
-  
-  Lemma finite_fields_proj : forall (f : fld) (n i : nat), projT1 f = n -> n < i -> 
-    i < max_fld ->  
-    In f (with_bound i max_fld).
-  Proof. 
-    intros. induction i.
-    + inversion H0.
-    + destruct n. destruct i.
-      simpl.
-      destruct (lt_dec 1 max_fld).
-      simpl.
-      destruct (lt_dec 0 max_fld).
-      simpl.
-      right.
-      left.
-      auto.
-      admit.
-      admit.
-      admit.
-      admit.
-      admit.
+Lemma val_eqdec :  forall (v1 v2:val), { v1 = v2 } + { v1 <> v2 }.
+Proof.
+  admit.
+Qed.
