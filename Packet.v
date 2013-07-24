@@ -56,12 +56,14 @@ Module Packet : PACKET.
 
   Parameter max_fld max_val : nat.
 
-  Inductive fld := 
-    | switch : fld
-    | inport : fld
-    | srcmac : fld
-    | dstmac : fld
-    | payload : fld.
+  Inductive fldi := 
+    | switch : fldi
+    | inport : fldi
+    | srcmac : fldi
+    | dstmac : fldi
+    | payload : fldi.
+
+Definition fld := fldi.
 
   Inductive bvector : nat -> Type :=
     | bnil : bvector 0
@@ -86,6 +88,8 @@ Module Packet : PACKET.
 
   Definition all_flds := 
     [ switch; inport; srcmac; dstmac; payload ].
+  
+  Definition all_fields:= all_flds.
 
   Definition all_vals := all_vals_aux max_val.
 
@@ -151,13 +155,15 @@ Proof.
   apply bvector_eqdec.
 Qed.
 
-Record pk := Packet {
+Record pack := Packet {
   Pkswitch : val;
   Pkinport : val;
   Pksrcmac : val;
   Pkdstmac : val;
   Pkpayload : val
 }.
+
+Definition pk := pack.
 
 Definition get_field (f : fld) (p : pk): val :=
   match f with 
@@ -177,39 +183,40 @@ Definition set_field (f : fld) (v : val) (p : pk) : pk :=
     | payload => Packet (get_field switch p) (get_field inport p) (get_field srcmac p) (get_field dstmac p) v
   end.
 
-Lemma mod_mod_comm : forall (f1 f2 : fld) (v1 v2 : val) (p : pk), f1 <> f2 ->
-  set_field f1 v1 (set_field f2 v2 p) = set_field f2 v2 (set_field f1 v1 p).
+Lemma mod_mod_comm : forall (pk : pk) (f1 f2 : fld) (n1 n2 :val), f1 <> f2 ->
+      set_field f1 n1 (set_field f2 n2 pk) = set_field f2 n2 (set_field f1 n1 pk).
 Proof with auto.
   intros.
   destruct f1; destruct f2; simpl; try solve [contradiction H; auto]; reflexivity.
 Qed. 
 
-Lemma mod_filter_comm : forall (f f' : fld) (v : val) (p : pk), f <> f' -> 
-  get_field f' p = get_field f' (set_field f v p).
+Lemma mod_filter_comm : forall (pk : pk) (f f' : fld) (n : val), f <> f' -> 
+      get_field f' pk = get_field f' (set_field f n pk).
 Proof with auto.
   intros.
   destruct f; destruct f'; simpl; try solve [contradiction H; auto]; reflexivity.
 Qed.
 
-Lemma mod_filter : forall (f : fld) (v : val) (p : pk),
-  get_field f (set_field f v p) = v.
+Lemma mod_filter : forall (pk : pk) (f : fld) (n : val),
+  get_field f (set_field f n pk) = n.
 Proof with auto.
   intros.
-  destruct p; destruct f; simpl; reflexivity.
+  destruct pk0; destruct f; simpl; reflexivity.
 Qed.
 
-Lemma mod_mod : forall (f : fld) (v v' : val) (p : pk), 
-  set_field f v (set_field f v' p) = set_field f v p.
-Proof with auto.
-  intros.
-  destruct p; destruct f; simpl; reflexivity.
-Qed.
-
-Lemma filter_mod : forall (f : fld) (v : val) (p : pk), 
-  get_field f p = v <-> set_field f v p = p.
+Lemma filter_mod : forall (pk : pk) (f : fld) (n : val), 
+  get_field f pk = n <-> set_field f n pk = pk.
 Proof with auto.
   intros. split; intros.
-  + destruct p; destruct f; simpl in *; subst; reflexivity.
-  + destruct p; destruct f; simpl in *; inversion H; reflexivity.
+  + destruct pk0; destruct f; simpl in *; subst; reflexivity.
+  + destruct pk0; destruct f; simpl in *; inversion H; reflexivity.
 Qed.
 
+Lemma mod_mod : forall (pk : pk) (f : fld) (n n' : val), 
+  set_field f n (set_field f n' pk) = set_field f n pk.
+Proof with auto.
+  intros.
+  destruct pk0; destruct f; simpl; reflexivity.
+Qed.
+
+End Packet.
