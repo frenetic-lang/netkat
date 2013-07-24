@@ -3,6 +3,7 @@ Set Implicit Arguments.
 Require Import Relation.
 Require Import Syntax.
 Require Import Semantics.
+Require Import Packet.
 Require Import Coq.Classes.Equivalence.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Logic.FunctionalExtensionality.
@@ -22,7 +23,7 @@ Require Import Coq.Setoids.Setoid.
     generalize dependent r.
     induction H; intros...
     + unfold eval in H0. 
-    destruct (beq_nat (get_Field (get_Packet h) f) v) in H0...
+    destruct (Packet.beq_val (Packet.get_field f (get_packet h)) v) in H0...
     + simpl in H1. unfold union in H1. destruct H1...
     + simpl in H1. unfold join in H1. destruct H1. destruct H1.
       apply IHpred1 in H1. destruct H1. contradiction. subst.
@@ -38,7 +39,7 @@ Require Import Coq.Setoids.Setoid.
     induction H; intros; simpl in *.
     + unfold empty in H. contradiction.
     + auto.
-    + destruct (beq_nat (get_Field (get_Packet x) f) v) in H...
+    + destruct (Packet.beq_val (Packet.get_field f (get_packet x)) v) in H...
       contradiction.
     + unfold union in H1. destruct H1...
     + unfold join in H1.  destruct H1... destruct H1...
@@ -131,7 +132,7 @@ Require Import Coq.Setoids.Setoid.
   Proof with auto.
     intros.
     induction e; intuition; simpl in *; try solve [inversion H].
-    + destruct (beq_nat (get_Field (get_Packet x) f) n). left. reflexivity.
+    + destruct (Packet.beq_val (Packet.get_field f (get_packet x)) v). left. reflexivity.
       unfold not. right. intros. trivial.
     + unfold union. destruct IHe1. inversion H. trivial. destruct IHe2.
       inversion H. trivial. left. intuition. left. intuition. inversion H. 

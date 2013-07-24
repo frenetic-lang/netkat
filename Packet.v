@@ -28,6 +28,8 @@ Module Type PACKET.
  
   Axiom get_field : fld -> pk -> val.
 
+  Axiom beq_val : val -> val -> bool.
+
   Section Axioms.
 
     Variable pk : pk.
@@ -50,7 +52,7 @@ Module Type PACKET.
   
 End PACKET.
 
-Module Packet : PACKET.
+Module Packet.
 
   Require Import Coq.Arith.Compare_dec.
 
@@ -139,21 +141,24 @@ Lemma bvector_eqdec : forall (n:nat) (bv1 bv2:bvector n), { bv1 = bv2 } + { bv1 
 Proof with eauto.
   dependent induction bv1; dependent destruction bv2.
   + left. intuition.
-  + destruct b; destruct b0.
-    - destruct (IHbv1 bv2) as [ eq | neq ].
-      * left. rewrite -> eq. intuition.
-      * right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
-    - right. unfold not. intros. dependent destruction H.
-    - right. unfold not. intros. dependent destruction H.
-    - destruct (IHbv1 bv2) as [ eq | neq ].
-      * left. rewrite -> eq. intuition.
-      * right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
+  + destruct b; destruct b0; 
+    try solve [right; unfold not; intros; dependent destruction H]; destruct (IHbv1 bv2) as [ eq | neq ];
+    try solve [left; rewrite -> eq; intuition]; 
+    right; unfold not; intros; contradiction neq; dependent destruction H; trivial.
 Qed.
 
 Lemma val_eqdec : forall (v1 v2:val), {v1 = v2 } + { v1 <> v2 }.
 Proof.
   apply bvector_eqdec.
 Qed.
+
+Definition beq_val (v1 v2 : val) : bool :=
+  match val_eqdec v1 v2 with
+    | left _ => true
+    | right _ => false
+  end. 
+
+Axiom beq_val_means : forall (v1 v2 : val), true = beq_val v1 v2 <-> v1 = v2.
 
 Record pack := Packet {
   Pkswitch : val;
@@ -207,9 +212,7 @@ Qed.
 Lemma filter_mod : forall (pk : pk) (f : fld) (n : val), 
   get_field f pk = n <-> set_field f n pk = pk.
 Proof with auto.
-  intros. split; intros.
-  + destruct pk0; destruct f; simpl in *; subst; reflexivity.
-  + destruct pk0; destruct f; simpl in *; inversion H; reflexivity.
+  intros. split; intros; destruct pk0; destruct f; simpl in *; try solve [subst; reflexivity]; inversion H; reflexivity.
 Qed.
 
 Lemma mod_mod : forall (pk : pk) (f : fld) (n n' : val), 

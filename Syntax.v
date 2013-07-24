@@ -1,22 +1,14 @@
 Set Implicit Arguments.
 
-Inductive field : Type :=
-  | Src : field
-  | Dst : field.
+Require Import Packet.
 
-Record packet := Packet {
-  pktSrc : nat;
-  pktDst : nat
-}.
+Import Packet.Packet.
 
-(*
-Axiom k : nat.
+Let field := fld.
 
-Axiom v : Type.
+Let packet := pk.
 
-Inductive packet := 
- | Packet : forall (lst : list v), length lst = k -> packet.
-*) 
+Let val := val.
 
 Inductive history : Type := 
  | OneHist : packet -> history
@@ -25,18 +17,18 @@ Inductive history : Type :=
 Inductive exp :=
  | Drop : exp
  | Id : exp
- | Match : field -> nat -> exp
+ | Match : field -> val -> exp
  | Par : exp -> exp -> exp
  | Seq : exp -> exp -> exp
  | Neg : exp -> exp
- | Mod : field -> nat -> exp
+ | Mod : field -> val -> exp
  | Star : exp -> exp
  | Obs : exp.
 
 Inductive pred : exp -> Prop := 
   | PrDrop : pred Drop
   | PrId : pred Id
-  | PrMatch : forall (f : field) (v : nat), pred (Match f v)
+  | PrMatch : forall (f : field) (v : val), pred (Match f v)
   | PrPar : forall (e1 e2 : exp),
       pred e1 ->
       pred e2 ->
@@ -53,7 +45,7 @@ Inductive pol : exp -> Prop :=
   | PolPred : forall (e1 : exp),
       pred e1 -> 
       pol e1
-  | PolMod : forall (f : field) (v : nat),
+  | PolMod : forall (f : field) (v : val),
       pol (Mod f v)
   | PolPar : forall (e1 e2 : exp),
       pol e1 -> 

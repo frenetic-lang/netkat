@@ -1,31 +1,20 @@
 Set Implicit Arguments.
 
 Require Import Relation.
+Require Import Packet.
 Require Import Syntax.
 Require Import Coq.Classes.Equivalence.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Logic.FunctionalExtensionality.
 Require Import Coq.Setoids.Setoid.
-
-  Definition get_Field (pkt : packet) (fld : field) : nat :=
-    match fld with
-      | Src => pktSrc pkt
-      | Dst => pktDst pkt
-    end.
   
-  Definition set_field_p (p : packet) (fld : field) (n : nat) : packet :=
-    match fld with 
-      | Src => Packet n (get_Field p Dst)
-      | Dst => Packet (get_Field p Src) n
-    end.
-  
-  Definition set_field (h : history) (fld : field) (n : nat) : history :=
+  Definition set_field (h : history) (fld : field) (n : val) : history :=
     match h with
-      | OneHist p => OneHist (set_field_p p fld n)
-      | ConsHist p hst => ConsHist (set_field_p p fld n) hst
+      | OneHist p => OneHist (Packet.set_field fld n p)
+      | ConsHist p hst => ConsHist (Packet.set_field fld n p) hst
     end.        
-
-  Definition get_Packet (hst : history) : packet :=
+  
+  Definition get_packet (hst : history) : packet :=
     match hst with
       | OneHist p => p
       | ConsHist p h => p
@@ -37,7 +26,7 @@ Require Import Coq.Setoids.Setoid.
       | Id => @id history
       | Match f v => 
         fun (h r : history) =>
-          match beq_nat (get_Field (get_Packet h) f) v with 
+          match Packet.beq_val (Packet.get_field f (get_packet h)) v with 
             | true => h = r
             | false => False
           end
@@ -45,7 +34,7 @@ Require Import Coq.Setoids.Setoid.
         fun (h r : history) => r = set_field h f v
       | Par e1 e2 => union (eval e1) (eval e2)
       | Neg e1 => inv (eval e1)
-      | Obs => fun (h r : history) => r = (ConsHist (get_Packet h) h)
+      | Obs => fun (h r : history) => r = (ConsHist (get_packet h) h)
       | Seq e1 e2 => join (eval e1) (eval e2)
       | Star e1 => star (eval e1)
     end.

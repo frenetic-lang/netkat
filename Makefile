@@ -1,4 +1,5 @@
 MODULES := \
+  Packet \
   Relation \
   Syntax \
   Semantics \
