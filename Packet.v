@@ -197,3 +197,19 @@ Proof with auto.
   intros.
   destruct p; destruct f; simpl; reflexivity.
 Qed.
+
+Lemma mod_mod : forall (f : fld) (v v' : val) (p : pk), 
+  set_field f v (set_field f v' p) = set_field f v p.
+Proof with auto.
+  intros.
+  destruct p; destruct f; simpl; reflexivity.
+Qed.
+
+(*Lemma filter_mod : forall (f : fld) (v : val) (p : pk), 
+  get_field f p = v <-> set_field f v p = p.
+Proof with auto.
+  intros. split; intros.
+  + destruct p; destruct f; simpl in *; subst; reflexivity.
+  + destruct p; destruct f; simpl in *; admit.
+Qed.*)
+
