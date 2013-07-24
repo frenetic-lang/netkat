@@ -115,9 +115,9 @@ Module Packet : PACKET.
     In bv (all_vals_aux i).
   Proof.
     intros.
-    induction bv.
-    + simpl. intuition.
-    + simpl. apply in_extend_bvector. apply IHbv.
+    induction bv; simpl.
+    + intuition.
+    + apply in_extend_bvector. apply IHbv.
   Qed.
   
   Lemma finite_vals : forall (v:val), In v all_vals.
@@ -133,24 +133,48 @@ Module Packet : PACKET.
 (* JNF: there has got to be a better way. *)
 Lemma bvector_eqdec : forall (n:nat) (bv1 bv2:bvector n), { bv1 = bv2 } + { bv1 <> bv2 }.
 Proof with eauto.
-  dependent induction bv1. 
-  dependent destruction bv2.
-  left. intuition.
-  dependent destruction bv2.
-  destruct b.
-  destruct b0.
-  destruct (IHbv1 bv2) as [ eq | neq ].
-  left. rewrite -> eq. intuition.
-  right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
-  right. unfold not. intros. dependent destruction H. 
-  destruct b0.
-  right. unfold not. intros. dependent destruction H.  
-  destruct (IHbv1 bv2) as [ eq | neq ].
-  left. rewrite -> eq. intuition.
-  right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
+  dependent induction bv1; dependent destruction bv2.
+  + left. intuition.
+  + destruct b; destruct b0.
+    - destruct (IHbv1 bv2) as [ eq | neq ].
+      * left. rewrite -> eq. intuition.
+      * right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
+    - right. unfold not. intros. dependent destruction H.
+    - right. unfold not. intros. dependent destruction H.
+    - destruct (IHbv1 bv2) as [ eq | neq ].
+      * left. rewrite -> eq. intuition.
+      * right. unfold not. intros. contradiction neq. dependent destruction H. trivial.
 Qed.
 
 Lemma val_eqdec : forall (v1 v2:val), {v1 = v2 } + { v1 <> v2 }.
 Proof.
   apply bvector_eqdec.
 Qed.
+
+Record pk := Packet {
+  Pkswitch : val;
+  Pkinport : val;
+  Pksrcmac : val;
+  Pkdstmac : val;
+  Pkpayload : val
+}.
+
+Definition get_field (p : pk) (f : fld) : val :=
+  match f with 
+    | switch => Pkswitch p
+    | inport => Pkinport p
+    | srcmac => Pksrcmac p
+    | dstmac => Pkdstmac p
+    | payload => Pkpayload p
+  end.
+
+Definition set_field (p : pk) (f : fld) (v : val) : pk := 
+  match f with
+    | switch => Packet v (get_field p inport) (get_field p srcmac) (get_field p dstmac) (get_field p payload)
+    | inport => Packet (get_field p switch) v (get_field p srcmac) (get_field p dstmac) (get_field p payload)
+    | srcmac => Packet (get_field p switch) (get_field p inport) v (get_field p dstmac) (get_field p payload)
+    | dstmac => Packet (get_field p switch) (get_field p inport) (get_field p srcmac) v (get_field p payload)
+    | payload => Packet (get_field p switch) (get_field p inport) (get_field p srcmac) (get_field p dstmac) v
+  end.
+
+
