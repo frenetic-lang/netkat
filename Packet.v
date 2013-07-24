@@ -179,7 +179,14 @@ Definition set_field (f : fld) (v : val) (p : pk) : pk :=
 
 Lemma mod_mod_comm : forall (f1 f2 : fld) (v1 v2 : val) (p : pk), f1 <> f2 ->
   set_field f1 v1 (set_field f2 v2 p) = set_field f2 v2 (set_field f1 v1 p).
+Proof with auto.
   intros.
   destruct f1; destruct f2; simpl; try solve [contradiction H; auto]; reflexivity.
 Qed. 
 
+Lemma mod_filter_comm : forall (f f' : fld) (v : val) (p : pk), f <> f' -> 
+  get_field f' p = get_field f' (set_field f v p).
+Proof with auto.
+  intros.
+  destruct f; destruct f'; simpl; try solve [contradiction H; auto]; reflexivity.
+Qed.
