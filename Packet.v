@@ -190,3 +190,10 @@ Proof with auto.
   intros.
   destruct f; destruct f'; simpl; try solve [contradiction H; auto]; reflexivity.
 Qed.
+
+Lemma mod_filter : forall (f : fld) (v : val) (p : pk),
+  get_field f (set_field f v p) = v.
+Proof with auto.
+  intros.
+  destruct p; destruct f; simpl; reflexivity.
+Qed.
