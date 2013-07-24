@@ -200,8 +200,12 @@ Require Import Coq.Program.Equality.
      try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
         remember (Packet.beq_val Pkpayload a); destruct b; try solve [trivial]; try solve [contradiction];
         apply IHl in H; trivial].
-    + unfold id in H. subst.
-      admit.
+    + unfold id in H. subst. destruct f; simpl; destruct y; destruct p; unfold Add_Match_All_Exp; induction (Packet.all_vals) eqn:n; 
+      try solve [simpl; unfold empty; apply Packet.all_vals_nonempty; trivial].
+      simpl. unfold union. right. apply IHl. subst.
+      try solve [simpl; unfold union; right; apply IHl].
+    
+       
    Admitted.
     
    

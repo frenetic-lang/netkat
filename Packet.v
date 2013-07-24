@@ -48,6 +48,10 @@ Module Type PACKET.
 
     Axiom mod_mod : set_field f n (set_field f n' pk) = set_field f n pk.
 
+    Axiom all_vals_nonempty : all_vals <> nil.
+    
+    Axiom all_fields_nonempty : all_fields <> nil.
+ 
   End Axioms.
   
 End PACKET.
@@ -222,4 +226,14 @@ Proof with auto.
   destruct pk0; destruct f; simpl; reflexivity.
 Qed.
 
+Lemma all_fields_nonempty : all_fields <> nil.
+  unfold not. intros. unfold all_fields in H. unfold all_flds in H. inversion H.
+Qed.
+
+(* I'm pretty sure this isn't provable right now, because we never specified a non-zero value for max_val, but it 
+   needs to be made provable. *)
+Lemma all_vals_nonempty : all_vals <> nil.
+  unfold not. intros. unfold all_vals in H. unfold all_vals_aux in H. Admitted.
+
 End Packet.
+
