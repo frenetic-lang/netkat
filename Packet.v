@@ -159,7 +159,7 @@ Record pk := Packet {
   Pkpayload : val
 }.
 
-Definition get_field (p : pk) (f : fld) : val :=
+Definition get_field (f : fld) (p : pk): val :=
   match f with 
     | switch => Pkswitch p
     | inport => Pkinport p
@@ -168,13 +168,18 @@ Definition get_field (p : pk) (f : fld) : val :=
     | payload => Pkpayload p
   end.
 
-Definition set_field (p : pk) (f : fld) (v : val) : pk := 
+Definition set_field (f : fld) (v : val) (p : pk) : pk := 
   match f with
-    | switch => Packet v (get_field p inport) (get_field p srcmac) (get_field p dstmac) (get_field p payload)
-    | inport => Packet (get_field p switch) v (get_field p srcmac) (get_field p dstmac) (get_field p payload)
-    | srcmac => Packet (get_field p switch) (get_field p inport) v (get_field p dstmac) (get_field p payload)
-    | dstmac => Packet (get_field p switch) (get_field p inport) (get_field p srcmac) v (get_field p payload)
-    | payload => Packet (get_field p switch) (get_field p inport) (get_field p srcmac) (get_field p dstmac) v
+    | switch => Packet v (get_field inport p) (get_field srcmac p) (get_field dstmac p) (get_field payload p)
+    | inport => Packet (get_field switch p) v (get_field srcmac p) (get_field dstmac p) (get_field payload p)
+    | srcmac => Packet (get_field switch p) (get_field inport p) v (get_field dstmac p) (get_field payload p)
+    | dstmac => Packet (get_field switch p) (get_field inport p) (get_field srcmac p) v (get_field payload p)
+    | payload => Packet (get_field switch p) (get_field inport p) (get_field srcmac p) (get_field dstmac p) v
   end.
 
+Lemma mod_mod_comm : forall (f1 f2 : fld) (v1 v2 : val) (p : pk), f1 <> f2 ->
+  set_field f1 v1 (set_field f2 v2 p) = set_field f2 v2 (set_field f1 v1 p).
+  intros.
+  destruct f1; destruct f2; simpl; try solve [contradiction H; auto]; reflexivity.
+Qed. 
 
