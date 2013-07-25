@@ -165,7 +165,10 @@ Definition beq_val (v1 v2 : val) : bool :=
     | right _ => false
   end. 
 
-Axiom beq_val_means : forall (v1 v2 : val), true = beq_val v1 v2 <-> v1 = v2.
+Lemma beq_val_means : forall (v1 v2 : val), true = beq_val v1 v2 <-> v1 = v2.
+  intros.
+  split; unfold beq_val; destruct (val_eqdec v1 v2); intros; try solve [trivial]; inversion H; contradiction.
+Qed.
 
 Record pack := Packet {
   Pkswitch : val;
@@ -174,6 +177,11 @@ Record pack := Packet {
   Pkdstmac : val;
   Pkpayload : val
 }.
+
+Lemma beq_val_false : forall (v1 v2 : val), false = beq_val v1 v2 <-> v1 <> v2.
+  intros.
+  split; unfold beq_val; destruct (val_eqdec v1 v2); intros; try solve [trivial] ; try solve [inversion H]; contradiction.
+Qed.
 
 Definition pk := pack.
 

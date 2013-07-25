@@ -8,11 +8,13 @@ Require Import Omega.
 Require Import Syntax.
 Require Import Semantics.
 Require Import KAAxioms.
+Require Import BooleanAlgebraAxioms.
 Require Import Coq.Classes.Equivalence.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Logic.FunctionalExtensionality.
 Require Import Coq.Setoids.Setoid.
 Require Import Coq.Program.Equality.
+Require Import Coq.Lists.List.
 
  Existing Instances Equivalence_exp.
  Local Open Scope equiv_scope.
@@ -170,17 +172,30 @@ Require Import Coq.Program.Equality.
      unfold union in H. destruct H. remember (Packet.beq_val (Packet.Pkswitch (get_packet h2)) a).
      destruct b. apply Packet.beq_val_means in Heqb. simpl in *.*)
 
-  Fixpoint Add_Match_All_Exp (all_vals : list val) (f : field) : exp :=
-    match all_vals with 
+  Fixpoint Add_Matches (l : list val) (f : field) : exp :=
+    match l with 
       | nil => Drop
-      | v :: l => (Par (Match f v) (Add_Match_All_Exp l f))
+      | h :: t => (Par (Match f h) (Add_Matches t f))
     end.
+ 
+  Lemma Add_Matches_Match : forall (l : list val) (f : field) (h : history),
+    In (Packet.get_field f (get_packet h)) l -> eval (Add_Matches l f) h h.
+  Proof with auto.
+    intros. induction l.
+    + inversion H.
+    + remember (Packet.beq_val (Packet.get_field f (get_packet h)) a). destruct b.
+      - simpl. unfold union. left. rewrite <- Heqb. reflexivity.
+      - simpl. unfold union. right. assert (In (Packet.get_field f (get_packet h)) l). simpl in H. destruct H.
+        * apply Packet.beq_val_false in Heqb. rewrite <- H in Heqb. contradiction Heqb. reflexivity.
+        * trivial.
+        * apply IHl. trivial.
+  Qed.         
 
   Lemma PA_Match_All : forall (f : field), 
-    Add_Match_All_Exp Packet.all_vals f === Id.
+    Add_Matches Packet.all_vals f === Id.
   Proof with auto.
     intros. split; intros; simpl in *.
-    + destruct f; destruct x; destruct y; destruct p; destruct p0; simpl in *; try solve [induction Packet.all_vals; 
+    + destruct f ; destruct x; destruct y; destruct p; destruct p0; simpl in *; try solve [induction Packet.all_vals; 
      try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
         remember (Packet.beq_val Pkswitch a); destruct b; try solve [trivial]; try solve [contradiction];
         apply IHl in H; trivial]; 
@@ -200,10 +215,20 @@ Require Import Coq.Program.Equality.
      try solve [unfold empty in H; contradiction]; unfold union in H; destruct H; simpl in *;
         remember (Packet.beq_val Pkpayload a); destruct b; try solve [trivial]; try solve [contradiction];
         apply IHl in H; trivial].
-    + unfold id in H. subst. destruct f; simpl; destruct y; destruct p; unfold Add_Match_All_Exp; induction (Packet.all_vals) eqn:n; 
-      try solve [simpl; unfold empty; apply Packet.all_vals_nonempty; trivial].
-      simpl. unfold union. right. apply IHl. subst.
-      try solve [simpl; unfold union; right; apply IHl].
+    + unfold id in H. subst. destruct y.
+      induction (Packet.all_vals) eqn:n.
+      try solve [simpl; unfold empty; apply Packet.all_vals_nonempty; trivial]. simpl in *. unfold union.
+      simpl; unfold union. remember (Packet.beq_val
+      (Packet.Pkswitch
+         (get_packet
+            (OneHist
+               {|
+               Packet.Pkswitch := Pkswitch;
+               Packet.Pkinport := Pkinport;
+               Packet.Pksrcmac := Pksrcmac;
+               Packet.Pkdstmac := Pkdstmac;
+               Packet.Pkpayload := Pkpayload |}))) a). destruct b. left. reflexivity.
+               destruct Packet.all_vals. inversion n.        
     
        
    Admitted.
