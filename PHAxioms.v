@@ -91,7 +91,7 @@ Require Import Coq.Lists.List.
     forall (f1 : field) (n1 : val) (x : history), 
      Packet.beq_val (Packet.get_field f1 (get_packet (set_field x f1 n1))) n1 = true.
   Proof with auto.
-    intros; assert (true = Packet.beq_val n1 n1). rewrite Packet.beq_val_means with (v1 := n1) (v2 := n1); reflexivity.
+    intros; assert (true = Packet.beq_val n1 n1). rewrite Packet.beq_val_true with (v1 := n1) (v2 := n1); reflexivity.
     destruct x; destruct p; simpl; unfold Packet.set_field; simpl; destruct f1; simpl; rewrite H; reflexivity.
  Qed.
 
@@ -121,11 +121,11 @@ Require Import Coq.Lists.List.
     intros. split; intros; simpl in *; unfold join in *.
     + destruct H as [z [H1 H2]].
       subst. remember (Packet.beq_val (Packet.get_field f1 (get_packet x)) n1).
-      destruct b. subst. apply Mod_to_Filter. apply Packet.beq_val_means in Heqb...
+      destruct b. subst. apply Mod_to_Filter. apply Packet.beq_val_true in Heqb...
       contradiction.
     + exists y. split...
       remember (Packet.beq_val (Packet.get_field f1 (get_packet x)) n1).
-      destruct b. subst. apply Packet.beq_val_means in Heqb. apply Mod_to_Filter in Heqb...
+      destruct b. subst. apply Packet.beq_val_true in Heqb. apply Mod_to_Filter in Heqb...
       contradiction.
   Qed. 
 
@@ -149,7 +149,7 @@ Require Import Coq.Lists.List.
       remember (Packet.beq_val (Packet.get_field f1 (get_packet x)) n1).
       remember (Packet.beq_val (Packet.get_field f1 (get_packet z)) n2).
       destruct b; destruct b0; subst; destruct y; simpl in *; 
-      destruct p; try solve [apply Packet.beq_val_means in Heqb; apply Packet.beq_val_means in Heqb0;
+      destruct p; try solve [apply Packet.beq_val_true in Heqb; apply Packet.beq_val_true in Heqb0;
       subst; destruct f1; contradiction H; auto]; contradiction.
     + unfold empty in H0. contradiction.
   Qed.
@@ -163,14 +163,6 @@ Require Import Coq.Lists.List.
                                                end))
                         (Add_Match_All l f)
     end.
-
- (*Lemma PA_Match_All : forall (f : field) (h1 h2 : history), 
-   (Add_Match_All Packet.all_vals f) h1 h2 === id h1 h2.
- Proof with auto.
-   intros. split; intros.
-   + unfold id. destruct f. unfold Add_Match_All in H. induction Packet.all_vals. contradiction. simpl in *.
-     unfold union in H. destruct H. remember (Packet.beq_val (Packet.Pkswitch (get_packet h2)) a).
-     destruct b. apply Packet.beq_val_means in Heqb. simpl in *.*)
 
   Fixpoint Add_Matches (l : list val) (f : field) : exp :=
     match l with 
