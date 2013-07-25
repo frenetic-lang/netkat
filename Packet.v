@@ -60,7 +60,10 @@ Module Packet.
 
   Require Import Coq.Arith.Compare_dec.
 
-  Parameter max_fld max_val : nat.
+  Parameter max_fld : nat.
+
+  Definition max_val := 9. 
+(* Obviously the max value shouldn't be 9, but we need to set it to some nonzero number.*) 
 
   Inductive fldi := 
     | switch : fldi
@@ -230,10 +233,9 @@ Lemma all_fields_nonempty : all_fields <> nil.
   unfold not. intros. unfold all_fields in H. unfold all_flds in H. inversion H.
 Qed.
 
-(* I'm pretty sure this isn't provable right now, because we never specified a non-zero value for max_val, but it 
-   needs to be made provable. *)
 Lemma all_vals_nonempty : all_vals <> nil.
-  unfold not. intros. unfold all_vals in H. unfold all_vals_aux in H. Admitted.
+  unfold not. intros. unfold all_vals in H. simpl in *. inversion H.
+Qed.
 
 End Packet.
 
