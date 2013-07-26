@@ -49,27 +49,18 @@ Require Import Coq.Lists.List.
      trivial.
  Qed.
 
- Lemma obs_doesnt_matter:
-   forall (f1 : field) (n1 : val) (x : history),
-     (Packet.get_field f1 (get_packet (ConsHist (get_packet x) x))) = 
-     (Packet.get_field f1 (get_packet x)).
-   Proof.
-     intros. auto.
- Qed.
-
  Lemma PA_Obs_Filter_Comm:
    forall (f1 : field) (n1 : val),
      (Seq Obs (Match f1 n1)) === (Seq (Match f1 n1) Obs).
  Proof with auto.
-   intros. split; intros; simpl in *; unfold join in *; destruct H as [z [H0 H1]]; subst. 
-   + exists x.
-    remember (Packet.beq_val (Packet.get_field f1 (get_packet (ConsHist (get_packet x) x))) n1).
-     destruct b. split... rewrite obs_doesnt_matter in Heqb. rewrite <- Heqb... trivial.
-    contradiction.
-   + exists (ConsHist (get_packet x) x). split...
-     rewrite <- obs_doesnt_matter in H0.
-     remember (Packet.beq_val (Packet.get_field f1 (get_packet (ConsHist (get_packet x) x))) n1).
-     destruct b. subst... contradiction. trivial.
+   intros. split; intros; simpl in *; unfold join in *; destruct H as [z [H0 H1]]; subst;
+   remember (Packet.beq_val (Packet.get_field f1 (get_packet (ConsHist (get_packet x) x))) n1);
+   destruct b; simpl in *.  
+   + exists x. split... rewrite <- Heqb. trivial. 
+   + contradiction.
+   + exists (ConsHist (get_packet x) x). split... simpl in *.
+     rewrite <- Heqb in H0. rewrite <- Heqb. subst...
+   + rewrite <- Heqb in H0. contradiction.
  Qed.
   
   Lemma PA_Mod_Filter:
@@ -148,9 +139,9 @@ Require Import Coq.Lists.List.
   Proof with auto.
     intros. induction l.
     + inversion H.
-    + remember (Packet.beq_val (Packet.get_field f (get_packet h)) a). destruct b.
-      - simpl. unfold union. left. rewrite <- Heqb. reflexivity.
-      - simpl. unfold union. right. assert (In (Packet.get_field f (get_packet h)) l). simpl in H. destruct H.
+    + remember (Packet.beq_val (Packet.get_field f (get_packet h)) a). destruct b; simpl; unfold union.
+      - left. rewrite <- Heqb. reflexivity.
+      - right. assert (In (Packet.get_field f (get_packet h)) l). simpl in H. destruct H.
         * apply Packet.beq_val_false in Heqb. rewrite <- H in Heqb. contradiction Heqb. reflexivity.
         * trivial.
         * apply IHl. trivial.
