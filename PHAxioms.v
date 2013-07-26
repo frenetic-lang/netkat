@@ -107,9 +107,9 @@ Require Import Coq.Lists.List.
   Proof with auto.
     intros. split; intros; simpl in *; unfold join in *.
     + destruct H as [z [H1 H2]].
-      subst. destruct x; destruct p; simpl; destruct f1; simpl...
+      subst. destruct x; simpl in *; rewrite Packet.mod_mod; reflexivity.
     + subst. exists (set_field x f1 n1). split...
-      simpl. destruct x; destruct p; destruct f1; simpl...
+      simpl. destruct x; simpl in *; rewrite Packet.mod_mod; reflexivity. 
   Qed.
       
   Lemma PA_Contra:
@@ -120,9 +120,11 @@ Require Import Coq.Lists.List.
     + destruct H0 as [z [H0 H1]]. unfold empty.
       remember (Packet.beq_val (Packet.get_field f1 (get_packet x)) n1).
       remember (Packet.beq_val (Packet.get_field f1 (get_packet z)) n2).
-      destruct b; destruct b0; subst; destruct y; simpl in *; 
-      destruct p; try solve [apply Packet.beq_val_true in Heqb; apply Packet.beq_val_true in Heqb0;
-      subst; destruct f1; contradiction H; auto]; contradiction.
+      destruct b; destruct b0; subst; destruct y; simpl in *; try solve
+      [apply Packet.beq_val_true in Heqb; apply Packet.beq_val_true in Heqb;
+      remember (Packet.beq_val (Packet.get_field f1 p) n1); destruct b; try solve
+      [try solve [inversion Heqb]; apply Packet.beq_val_true in Heqb1; apply Packet.beq_val_true in Heqb0;
+      rewrite Heqb1 in Heqb0; contradiction]]; try solve [contradiction H1]; try solve [contradiction H0].
     + unfold empty in H0. contradiction.
   Qed.
 

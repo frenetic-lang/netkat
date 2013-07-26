@@ -34,7 +34,7 @@ Module Type PACKET.
 
     Variable pk : pk.
     Variable f f' f1 f2 : fld.
-    Variable n n' n1 n2 : val.
+    Variable n n' n1 n2 v1 v2 : val.
 
     Axiom mod_mod_comm : f1 <> f2 ->
       set_field f1 n1 (set_field f2 n2 pk) = set_field f2 n2 (set_field f1 n1 pk).
@@ -51,19 +51,22 @@ Module Type PACKET.
     Axiom all_vals_nonempty : all_vals <> nil.
     
     Axiom all_fields_nonempty : all_fields <> nil.
+
+    Axiom beq_val_true : true = beq_val v1 v2 <-> v1 = v2.
+
+    Axiom beq_val_false : false = beq_val v1 v2 <-> v1 <> v2.
  
   End Axioms.
   
 End PACKET.
 
-Module Packet.
+Module Packet : PACKET.
 
   Require Import Coq.Arith.Compare_dec.
 
-  Parameter max_fld : nat.
+  Parameter max_fld max_val : nat.
 
-  Definition max_val := 9. 
-(* Obviously the max value shouldn't be 9, but we need to set it to some nonzero number.*) 
+  Axiom max_val_not_zero : exists (n : nat), max_val = S(n). 
 
   Inductive fldi := 
     | switch : fldi
@@ -170,6 +173,11 @@ Lemma beq_val_true : forall (v1 v2 : val), true = beq_val v1 v2 <-> v1 = v2.
   split; unfold beq_val; destruct (val_eqdec v1 v2); intros; try solve [trivial]; inversion H; contradiction.
 Qed.
 
+Lemma beq_val_false : forall (v1 v2 : val), false = beq_val v1 v2 <-> v1 <> v2.
+  intros.
+  split; unfold beq_val; destruct (val_eqdec v1 v2); intros; try solve [trivial] ; try solve [inversion H]; contradiction.
+Qed.
+
 Record pack := Packet {
   Pkswitch : val;
   Pkinport : val;
@@ -177,11 +185,6 @@ Record pack := Packet {
   Pkdstmac : val;
   Pkpayload : val
 }.
-
-Lemma beq_val_false : forall (v1 v2 : val), false = beq_val v1 v2 <-> v1 <> v2.
-  intros.
-  split; unfold beq_val; destruct (val_eqdec v1 v2); intros; try solve [trivial] ; try solve [inversion H]; contradiction.
-Qed.
 
 Definition pk := pack.
 
@@ -242,7 +245,8 @@ Lemma all_fields_nonempty : all_fields <> nil.
 Qed.
 
 Lemma all_vals_nonempty : all_vals <> nil.
-  unfold not. intros. unfold all_vals in H. simpl in *. inversion H.
+  unfold not. intros. unfold all_vals in H. assert (exists (n :nat), max_val = S(n)). apply max_val_not_zero. 
+  destruct H0. rewrite H0 in H. simpl in H. admit.
 Qed.
 
 End Packet.
