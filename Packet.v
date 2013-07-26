@@ -244,9 +244,15 @@ Lemma all_fields_nonempty : all_fields <> nil.
   unfold not. intros. unfold all_fields in H. unfold all_flds in H. inversion H.
 Qed.
 
+Lemma all_vals_aux_nonempty : forall (n : nat), all_vals_aux n <> nil.
+  induction n. simpl. unfold not. intros. inversion H.
+  unfold not. intros. unfold not in IHn. simpl in H. destruct (all_vals_aux n).
+  apply IHn. reflexivity.
+  simpl in H. inversion H.
+Qed.
+ 
 Lemma all_vals_nonempty : all_vals <> nil.
-  unfold not. intros. unfold all_vals in H. assert (exists (n :nat), max_val = S(n)). apply max_val_not_zero. 
-  destruct H0. rewrite H0 in H. simpl in H. admit.
+  unfold all_vals. apply all_vals_aux_nonempty.
 Qed.
 
 End Packet.
