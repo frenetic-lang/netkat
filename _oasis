@@ -1,0 +1,49 @@
+OASISFormat: 0.3
+Name:        Coq-NetKAT
+Version:     0.1
+Synopsis:    The Frenetic Compiler and Runtime System
+Authors:     Carolyn Anderson, Nate Foster, and Arjun Guha
+License:     LGPL
+Plugins:     META (0.3)
+BuildTools:
+  ocamlbuild,
+  ocamldoc
+
+Flag quickcheck
+  Description: build the netkat.quickcheck library
+  Default: false
+
+Library netkat
+  Path: lib
+  BuildDepends:
+  InternalModules:
+  Modules:
+    NetKAT_ONF,
+    NetKAT_Syntax,
+    NetKAT_Semantics
+
+Library quickcheck
+  Findlibparent: netkat
+  Findlibname: quickcheck
+  Path: quickcheck
+  BuildDepends:
+    quickcheck,
+    netkat
+  Modules:
+    NetKAT_Arbitrary
+
+Executable testtool
+  Path: test
+  MainIs: Test.ml
+  BuildDepends:
+    quickcheck,
+    netkat,
+    netkat.quickcheck,
+    pa_ounit,
+    pa_ounit.syntax
+  Install: False
+
+Test all_tests
+  Command: $testtool inline-test-runner dummy
+  Run$: flag(tests)
+  TestTools: testtool

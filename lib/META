@@ -1,0 +1,21 @@
+# OASIS_START
+# DO NOT EDIT (digest: d3d04680cbc9be8de171c9ebca2f66a7)
+version = "0.1"
+description = "The Frenetic Compiler and Runtime System"
+archive(byte) = "netkat.cma"
+archive(byte, plugin) = "netkat.cma"
+archive(native) = "netkat.cmxa"
+archive(native, plugin) = "netkat.cmxs"
+exists_if = "netkat.cma"
+package "quickcheck" (
+ version = "0.1"
+ description = "The Frenetic Compiler and Runtime System"
+ requires = "quickcheck netkat"
+ archive(byte) = "quickcheck.cma"
+ archive(byte, plugin) = "quickcheck.cma"
+ archive(native) = "quickcheck.cmxa"
+ archive(native, plugin) = "quickcheck.cmxs"
+ exists_if = "quickcheck.cma"
+)
+# OASIS_STOP
+

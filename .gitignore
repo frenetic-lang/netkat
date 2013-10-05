@@ -1,3 +1,7 @@
 *.glob
 *.v.d
 *.vo
+.DS_Store
+setup.data
+setup.log
+_build
