@@ -29,15 +29,15 @@ module Make (Syntax : NetKAT_Syntax.S)
 
   let gen_atom =
     let open Gen in
-    frequency [
-      (1, ret_gen Drop);
-      (1, ret_gen Id);
-      (2, arbitrary_hdr >>= fun h -> 
-            arbitrary_hdrVal >>= fun v -> 
-              ret_gen (Set (h, v)));
-      (2, arbitrary_hdr >>= fun h -> 
-            arbitrary_hdrVal >>= fun v -> 
-              ret_gen (Test (h, v)))
+    oneof [
+      ret_gen Drop;
+      ret_gen Id;
+      (arbitrary_hdr >>= fun h -> 
+        arbitrary_hdrVal >>= fun v -> 
+          ret_gen (Set (h, v)));
+      arbitrary_hdr >>= fun h -> 
+        arbitrary_hdrVal >>= fun v -> 
+          ret_gen (Test (h, v))
     ]
 
   let gen_pred_atom =
@@ -50,44 +50,51 @@ module Make (Syntax : NetKAT_Syntax.S)
           ret_gen (Test (h, v))
     ]
 
-  let rec gen_binpol (size : int) : pol Gen.gen =
+let rec gen_pred_ctor () : pol Gen.gen =
     let open Gen in
-    oneof [
-      gen_pol (size - 1) >>= fun e1 -> 
-        gen_pol (size - 1) >>= fun e2 -> 
-          ret_gen (Par (e1, e2));
-      gen_pol (size - 1) >>= fun e1 -> 
-        gen_pol (size - 1) >>= fun e2 -> 
-          ret_gen (Seq (e1, e2));
-      gen_pred (size - 1) >>= fun e -> 
-        ret_gen (Neg e)
-    ]
+    sized (fun n -> resize (n - 1)
+      (oneof [
+        (gen_pred () >>= fun e1 -> 
+           gen_pred () >>= fun e2 -> 
+             ret_gen (Par (e1, e2)));
+        (gen_pred () >>= fun e1 -> 
+           gen_pred () >>= fun e2 -> 
+             ret_gen (Seq (e1, e2)));
+        (gen_pred () >>= fun e ->
+           ret_gen (Neg e))
+      ]))
 
-  and gen_pred_ctor (size : int) : pol Gen.gen =
+  and gen_pred () : pol Gen.gen =
     let open Gen in
-    frequency [
-      (3, gen_pred (size - 1) >>= fun e1 -> 
-            gen_pred (size - 1) >>= fun e2 -> 
-              ret_gen (Par (e1, e2)));
-      (3, gen_pred (size - 1) >>= fun e1 -> 
-            gen_pred (size - 1) >>= fun e2 -> 
-              ret_gen (Seq (e1, e2)));
-      (3, gen_pred (size - 1) >>= fun e -> 
-              ret_gen (Neg e))      
-    ]
+    sized (fun n ->
+      frequency [
+        (1, gen_pred_atom);
+        (n - 1, gen_pred_ctor ())
+      ])
 
-  and gen_pred (size : int) : pol Gen.gen =
+
+
+  let rec gen_binpol () : pol Gen.gen =
     let open Gen in
-    if size < 1 then
-      gen_pred_atom
-    else 
-      Gen.oneof [gen_pred_atom; gen_pred_ctor size]
+    sized (fun n -> resize (n - 1)
+      (oneof [
+        (gen_pol () >>= fun e1 -> 
+           gen_pol () >>= fun e2 -> 
+             ret_gen (Par (e1, e2)));
+        (gen_pol () >>= fun e1 -> 
+           gen_pol () >>= fun e2 -> 
+             ret_gen (Seq (e1, e2)));
+        (gen_pred () >>= fun e -> 
+           ret_gen (Neg e))
+      ]))
 
-  and gen_pol (size : int) : pol Gen.gen =
-    if size < 1 then
-      gen_atom
-    else
-      Gen.oneof [gen_atom; gen_binpol size]
+  and gen_pol () : pol Gen.gen =
+    let open Gen in
+    sized (fun n ->
+      frequency [
+        (1, gen_atom);
+        (n - 1, gen_binpol ())
+      ])
 
   let num_hdrs = List.length all_headers
 
@@ -100,6 +107,6 @@ module Make (Syntax : NetKAT_Syntax.S)
         payload = payload
       }
 
-  let arbitrary_pol = Gen.sized gen_pol
+  let arbitrary_pol = gen_pol ()
 
 end

@@ -56,7 +56,7 @@ let prop_compile_ok (pol, pkt) =
 
 let qc () =
   Format.printf "prop_compile_ok:\n";
-  let cfg = { QuickCheck.verbose with QuickCheck.maxTest = 200 } in
+  let cfg = { QuickCheck.verbose with QuickCheck.maxTest = 1000 } in
   let _ = QuickCheck.check testable_pol_pkt_to_bool cfg prop_compile_ok in
   ()
 
