@@ -146,15 +146,27 @@ Definition fld := fldi.
    decide equality.
  Qed.
 
-(* JNF: there has got to be a better way. *)
+Lemma bvector_neq_head : forall (n : nat) (b1 b2 : bool) (bv1 bv2 : bvector n),
+  b1 <> b2 -> (bcons b1 bv1) <> (bcons b2 bv2).
+Proof.
+  intuition; inversion H0; contradiction.
+Qed.
+
+Lemma bvector_neq_tail : forall (n : nat) (b1 b2 : bool) (bv1 bv2 : bvector n),
+  bv1 <> bv2 -> (bcons b1 bv1) <> (bcons b2 bv2).
+Proof.
+  intuition; dependent destruction H0; auto.
+Qed.
+
 Lemma bvector_eqdec : forall (n:nat) (bv1 bv2:bvector n), { bv1 = bv2 } + { bv1 <> bv2 }.
-Proof with eauto.
+Proof.
   dependent induction bv1; dependent destruction bv2.
   + left. intuition.
-  + destruct b; destruct b0; 
-    try solve [right; unfold not; intros; dependent destruction H]; destruct (IHbv1 bv2) as [ eq | neq ];
-    try solve [left; rewrite -> eq; intuition]; 
-    right; unfold not; intros; contradiction neq; dependent destruction H; trivial.
+  + compare b b0; intro HHd; destruct (IHbv1 bv2) as [HTl|];
+    try rewrite HHd; try rewrite HTl;
+    try solve [right; apply bvector_neq_tail; assumption];
+    try solve [right; apply bvector_neq_head; assumption].
+    left; intuition.
 Qed.
 
 Lemma val_eqdec : forall (v1 v2:val), {v1 = v2 } + { v1 <> v2 }.
