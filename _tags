@@ -34,5 +34,5 @@ true: annot, bin_annot
 <test/*.ml{,i,y}>: use_netkat
 <test/*.ml{,i,y}>: use_quickcheck
 # OASIS_STOP
-<test/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-lib name_of_your_library)
+<test/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-lib netkat)
 true: thread
