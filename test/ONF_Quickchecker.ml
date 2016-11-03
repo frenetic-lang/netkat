@@ -78,10 +78,10 @@ let test_compile lhs rhs =
 let ite (pred : pol) (then_pol : pol) (else_pol : pol) : pol =
   Par (Seq (pred, then_pol), Seq (Neg pred, else_pol))
 
-TEST "compile drop" =
+let%test "compile drop" =
   test_compile Drop Drop
 
-TEST "compile !drop" = 
+let%test "compile !drop" = 
   test_compile 
     (Neg (Neg (Seq (Seq (Id,
                               Par (Par (Seq (Seq (Seq (Test (Dst,0),
@@ -98,15 +98,15 @@ TEST "compile !drop" =
 
 (* !Dst = 1 + (drop + id + (!drop) + drop ; drop) ; drop *)
 
-TEST "compile test" =
+let%test "compile test" =
   let pr = Test (Src, 100) in
   test_compile pr (ite pr Id Drop)
 
-TEST "compile negation" =
+let%test "compile negation" =
   let pr = Test (Src, 200) in
   test_compile (Neg pr) (ite pr Drop Id)
 
-TEST "compile negation of sum" =
+let%test "compile negation of sum" =
   let pr = Seq (Test (Src, 0), Test (Dst, 0)) in
   test_compile
     (Neg pr)
@@ -117,12 +117,12 @@ TEST "compile negation of sum" =
        (ite (Test (Src, 0)) Id Id))
 
 (* TODO(arjun): Prove that this is true using the axioms of NetKAT. *)
-TEST "commute test annihilator" =
+let%test "commute test annihilator" =
   test_compile
     (Seq (Set (Src, 1), Test (Src, 0)))
     Drop
 
-TEST "commute test different fields" =
+let%test "commute test different fields" =
   test_compile
     (Seq (Set (Src, 1), Test (Dst, 0)))
     (ite (Test (Dst, 0))
@@ -130,7 +130,7 @@ TEST "commute test different fields" =
        Drop)
 
 (* trivial optimization possible *)
-TEST "commute same field" =
+let%test "commute same field" =
   test_compile
     (Seq (Set (Src, 1), Test (Src, 1)))
     (ite Id
@@ -138,7 +138,7 @@ TEST "commute same field" =
        Drop)
 
 (* trivial optimization possible *)
-TEST "same field, two values = drop" =
+let%test "same field, two values = drop" =
   test_compile
     (Seq (Test (Src, 1), Test (Src, 0)))
     (ite (Test (Src, 1)) Drop Drop)

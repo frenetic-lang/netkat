@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d3d04680cbc9be8de171c9ebca2f66a7)
+# DO NOT EDIT (digest: 222b7f6b3f32531d8b36fc0c5ccfd16f)
 version = "0.1"
 description = "The Frenetic Compiler and Runtime System"
 archive(byte) = "netkat.cma"
@@ -10,7 +10,7 @@ exists_if = "netkat.cma"
 package "quickcheck" (
  version = "0.1"
  description = "The Frenetic Compiler and Runtime System"
- requires = "quickcheck netkat"
+ requires = "netkat quickcheck"
  archive(byte) = "quickcheck.cma"
  archive(byte, plugin) = "quickcheck.cma"
  archive(native) = "quickcheck.cmxa"

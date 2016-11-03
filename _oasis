@@ -1,10 +1,15 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name:        Coq-NetKAT
 Version:     0.1
 Synopsis:    The Frenetic Compiler and Runtime System
 Authors:     Carolyn Anderson, Nate Foster, and Arjun Guha
 License:     LGPL
 Plugins:     META (0.3)
+OCamlVersion: >= 4.01
+AlphaFeatures: 
+  no_automatic_syntax,
+  ocamlbuild_more_args
+XOCamlbuildPluginTags: package(ppx_driver.ocamlbuild)
 BuildTools:
   ocamlbuild,
   ocamldoc
@@ -27,8 +32,8 @@ Library quickcheck
   Findlibname: quickcheck
   Path: quickcheck
   BuildDepends:
-    quickcheck,
-    netkat
+    netkat,
+    quickcheck
   Modules:
     NetKAT_Arbitrary
 
@@ -36,11 +41,12 @@ Executable testtool
   Path: test
   MainIs: Test.ml
   BuildDepends:
+    ppx_jane,
+    ppx_inline_test,
     quickcheck,
     netkat,
     netkat.quickcheck,
-    pa_ounit,
-    pa_ounit.syntax
+    threads
   Install: False
 
 Test all_tests
